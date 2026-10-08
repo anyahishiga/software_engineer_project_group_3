@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+
+  <!-- Giúp giao diện responsive trên điện thoại -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Đăng nhập / Đăng ký</title>
+
+  <!-- File CSS chính của trang -->
+  <link rel="stylesheet" href="log_in_page.css">
+</head>
+
+
+<body>
+
+  <!-- =====================================================
+       CONTAINER CHÍNH
+       -----------------------------------------------------
+       .card là khung trắng chứa toàn bộ giao diện
+       Login / Signup.
+       ===================================================== -->
+
+  <main class="card">
+
+
+    <!-- ===================================================
+         1. RADIO ĐIỀU KHIỂN TAB
+         ---------------------------------------------------
+         Không cần JavaScript.
+
+         Radio Login được checked mặc định
+         -> hiển thị form Login.
+
+         Khi chọn Signup
+         -> CSS tự động hiển thị form Signup.
+         =================================================== -->
+
+    <input type="radio" name="tab" id="tab-login" checked>
+
+    <input type="radio" name="tab" id="tab-signup">
+
+
+    <!-- ===================================================
+         2. TAB LOGIN / SIGNUP
+         =================================================== -->
+
+    <div class="tabs">
+
+      <!-- Tab Đăng nhập -->
+      <label for="tab-login">
+        Đăng nhập
+      </label>
+
+      <!-- Tab Đăng ký -->
+      <label for="tab-signup">
+        Đăng ký
+      </label>
+
+      <!-- Thanh trắng chạy theo tab đang chọn -->
+      <span class="indicator"></span>
+
+    </div>
+
+
+    <!-- ===================================================
+         3. FORM ĐĂNG NHẬP
+         =================================================== -->
+
+    <form class="form form-login" action="#" method="post">
+
+      <!-- Tiêu đề -->
+      <h1>Chào mừng trở lại</h1>
+
+      <!-- Mô tả -->
+      <p class="subtitle">
+        Đăng nhập để tiếp tục
+      </p>
+
+
+      <!-- Username -->
+      <div class="field">
+
+        <label for="login-user">
+          Tên đăng nhập
+        </label>
+
+        <input type="text" id="login-user" name="username" placeholder="Nhập tên đăng nhập" required
+          autocomplete="username">
+
+      </div>
+
+
+      <!-- Password -->
+      <div class="field">
+
+        <label for="login-pass">
+          Mật khẩu
+        </label>
+
+        <input type="password" id="login-pass" name="password" placeholder="Nhập mật khẩu" required
+          autocomplete="current-password">
+
+      </div>
+
+
+      <!-- Link quên mật khẩu -->
+      <a href="#" class="forgot">
+        Quên mật khẩu?
+      </a>
+
+
+      <!-- Nút Login -->
+      <button type="submit" class="btn-primary">
+        Đăng nhập
+      </button>
+
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>hoặc tiếp tục với</span>
+      </div>
+
+
+      <!-- =================================================
+           SOCIAL LOGIN
+           -------------------------------------------------
+           Không nhúng SVG dài trực tiếp vào HTML.
+
+           Icon hiện tại dùng ký hiệu đơn giản.
+           Sau này có thể thay bằng:
+           - Font Awesome
+           - Lucide
+           - Bootstrap Icons
+           - SVG file riêng
+           ================================================= -->
+
+      <div class="social">
+
+        <!-- Google -->
+        <button type="button" class="btn-social">
+          <span class="social-icon">G</span>
+          Google
+        </button>
+
+
+        <!-- Facebook -->
+        <button type="button" class="btn-social">
+          <span class="social-icon">f</span>
+          Facebook
+        </button>
+
+      </div>
+
+    </form>
+
+
+
+    <!-- ===================================================
+         4. FORM ĐĂNG KÝ
+         =================================================== -->
+
+    <form class="form form-signup" action="#" method="post">
+
+      <!-- Tiêu đề -->
+      <h1>Tạo tài khoản</h1>
+
+      <!-- Mô tả -->
+      <p class="subtitle">
+        Chỉ mất vài giây để bắt đầu
+      </p>
+
+
+      <!-- Username -->
+      <div class="field">
+
+        <label for="signup-user">
+          Tên đăng nhập
+        </label>
+
+        <input type="text" id="signup-user" name="username" placeholder="Chọn tên đăng nhập" required
+          autocomplete="username">
+
+      </div>
+
+
+      <!-- Password -->
+      <div class="field">
+
+        <label for="signup-pass">
+          Mật khẩu
+        </label>
+
+        <input type="password" id="signup-pass" name="password" placeholder="Tạo mật khẩu" required minlength="6"
+          autocomplete="new-password">
+
+      </div>
+
+
+      <!-- Confirm Password -->
+      <div class="field">
+
+        <label for="signup-confirm">
+          Nhập lại mật khẩu
+        </label>
+
+        <input type="password" id="signup-confirm" name="confirm" placeholder="Nhập lại mật khẩu" required minlength="6"
+          autocomplete="new-password">
+
+      </div>
+
+
+      <!-- Nút đăng ký -->
+      <button type="submit" class="btn-primary">
+        Đăng ký
+      </button>
+
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>hoặc đăng ký với</span>
+      </div>
+
+
+      <!-- =================================================
+           SOCIAL SIGNUP
+           -------------------------------------------------
+           Dùng cùng cấu trúc với Login để dễ bảo trì.
+           ================================================= -->
+
+      <div class="social">
+
+        <!-- Google -->
+        <button type="button" class="btn-social">
+          <span class="social-icon">G</span>
+          Google
+        </button>
+
+
+        <!-- Facebook -->
+        <button type="button" class="btn-social">
+          <span class="social-icon">f</span>
+          Facebook
+        </button>
+
+      </div>
+
+    </form>
+
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="log_in_page.js"></script>
+</body>
+
+</html>
