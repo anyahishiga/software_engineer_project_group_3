@@ -1,0 +1,541 @@
+/* =========================================================
+   1. RESET CSS
+   ---------------------------------------------------------
+   Xóa margin/padding mặc định của trình duyệt.
+   box-sizing: border-box giúp width/height bao gồm cả
+   padding và border -> dễ kiểm soát kích thước hơn.
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* =========================================================
+   2. BIẾN MÀU DÙNG CHUNG
+   ---------------------------------------------------------
+   Khai báo màu tại đây để các thành viên dễ thay đổi
+   giao diện mà không cần tìm và sửa nhiều chỗ.
+   ========================================================= */
+
+:root {
+  --primary: #4f46e5;
+  --primary-dark: #4338ca;
+
+  --text: #1f2937;
+  --muted: #6b7280;
+
+  --border: #e5e7eb;
+  --bg-input: #f9fafb;
+}
+
+
+/* =========================================================
+   3. BODY
+   ---------------------------------------------------------
+   Căn toàn bộ form vào giữa màn hình.
+   Background sử dụng gradient tím -> hồng.
+   ========================================================= */
+
+body {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px 16px;
+
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    Roboto,
+    sans-serif;
+
+  color: var(--text);
+
+  background:
+    linear-gradient(
+      135deg,
+      #6366f1 0%,
+      #8b5cf6 50%,
+      #ec4899 100%
+    );
+}
+
+
+/* =========================================================
+   4. CARD - KHUNG FORM CHÍNH
+   ---------------------------------------------------------
+   Đây là container chứa:
+   - Tab Đăng nhập / Đăng ký
+   - Form đăng nhập
+   - Form đăng ký
+   - Social login
+   ========================================================= */
+
+.card {
+  position: relative;
+
+  width: 100%;
+  max-width: 420px;
+
+  padding: 32px 32px 36px;
+
+  background: #fff;
+
+  border-radius: 20px;
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+
+/* =========================================================
+   5. RADIO BUTTON ĐIỀU KHIỂN TAB
+   ---------------------------------------------------------
+   Radio được sử dụng để chuyển giữa Login và Signup
+   mà không cần JavaScript.
+
+   Người dùng không nhìn thấy radio, nhưng CSS vẫn sử dụng
+   trạng thái :checked của chúng để xác định form nào
+   đang được hiển thị.
+   ========================================================= */
+
+.card > input[type="radio"] {
+  display: none;
+}
+
+
+/* =========================================================
+   6. TABS
+   ---------------------------------------------------------
+   Khu vực chứa 2 tab:
+   - Đăng nhập
+   - Đăng ký
+
+   .indicator là phần nền trắng chạy theo tab đang chọn.
+   ========================================================= */
+
+.tabs {
+  position: relative;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  margin-bottom: 28px;
+
+  background: #f3f4f6;
+
+  border-radius: 12px;
+
+  padding: 4px;
+}
+
+
+/* Nội dung chữ của từng tab */
+
+.tabs label {
+  position: relative;
+  z-index: 1;
+
+  padding: 10px 0;
+
+  text-align: center;
+
+  font-weight: 600;
+  font-size: 0.95rem;
+
+  color: var(--muted);
+
+  cursor: pointer;
+
+  transition: color 0.25s;
+}
+
+
+/* Nền trắng nằm phía sau tab đang được chọn */
+
+.indicator {
+  position: absolute;
+
+  top: 4px;
+  left: 4px;
+
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+
+  background: #fff;
+
+  border-radius: 9px;
+
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.1);
+
+  transition: transform 0.3s ease;
+}
+
+
+/* Đổi màu chữ của tab đang active */
+
+#tab-login:checked ~ .tabs label[for="tab-login"],
+#tab-signup:checked ~ .tabs label[for="tab-signup"] {
+  color: var(--primary);
+}
+
+
+/* Di chuyển indicator sang bên phải khi chọn Đăng ký */
+
+#tab-signup:checked ~ .tabs .indicator {
+  transform: translateX(100%);
+}
+
+
+/* =========================================================
+   7. HIỂN THỊ FORM THEO TAB
+   ---------------------------------------------------------
+   Mặc định cả 2 form đều bị ẩn.
+
+   Khi radio Login được checked:
+       -> hiện .form-login
+
+   Khi radio Signup được checked:
+       -> hiện .form-signup
+   ========================================================= */
+
+.form {
+  display: none;
+
+  animation: fade 0.35s ease;
+}
+
+
+/* Hiện form Login */
+
+#tab-login:checked ~ .form-login {
+  display: block;
+}
+
+
+/* Hiện form Signup */
+
+#tab-signup:checked ~ .form-signup {
+  display: block;
+}
+
+
+/* Hiệu ứng xuất hiện nhẹ khi đổi tab */
+
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
+   8. TIÊU ĐỀ FORM
+   ========================================================= */
+
+.form h1 {
+  font-size: 1.6rem;
+  margin-bottom: 4px;
+}
+
+
+/* Dòng mô tả bên dưới tiêu đề */
+
+.subtitle {
+  color: var(--muted);
+
+  font-size: 0.92rem;
+
+  margin-bottom: 24px;
+}
+
+
+/* =========================================================
+   9. INPUT FIELD
+   ---------------------------------------------------------
+   Mỗi field gồm:
+   - label
+   - input
+   ========================================================= */
+
+.field {
+  margin-bottom: 16px;
+}
+
+
+/* Label của input */
+
+.field label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+
+/* Ô nhập dữ liệu */
+
+.field input {
+  width: 100%;
+
+  padding: 12px 14px;
+
+  font-size: 0.95rem;
+
+  color: var(--text);
+
+  background: var(--bg-input);
+
+  border: 1.5px solid var(--border);
+
+  border-radius: 10px;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+}
+
+
+/* Màu chữ placeholder */
+
+.field input::placeholder {
+  color: #9ca3af;
+}
+
+
+/* Hiệu ứng khi click vào input */
+
+.field input:focus {
+  background: #fff;
+
+  border-color: var(--primary);
+
+  box-shadow:
+    0 0 0 4px rgba(79, 70, 229, 0.12);
+}
+
+
+/* =========================================================
+   10. QUÊN MẬT KHẨU
+   ========================================================= */
+
+.forgot {
+  display: block;
+
+  text-align: right;
+
+  margin: -4px 0 18px;
+
+  font-size: 0.85rem;
+
+  color: var(--primary);
+
+  text-decoration: none;
+}
+
+
+/* Gạch chân khi hover */
+
+.forgot:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================================
+   11. NÚT CHÍNH
+   ---------------------------------------------------------
+   Dùng chung cho:
+   - Đăng nhập
+   - Đăng ký
+   ========================================================= */
+
+.btn-primary {
+  width: 100%;
+
+  margin-top: 6px;
+
+  padding: 13px;
+
+  font-size: 1rem;
+  font-weight: 600;
+
+  color: #fff;
+
+  background: var(--primary);
+
+  border: none;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s,
+    transform 0.1s;
+}
+
+
+/* Đổi màu khi rê chuột */
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+
+/* Hiệu ứng khi nhấn nút */
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+
+/* =========================================================
+   12. DIVIDER - "HOẶC"
+   ---------------------------------------------------------
+   Tạo đường kẻ:
+   
+   -------- hoặc tiếp tục với --------
+   ========================================================= */
+
+.divider {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  margin: 24px 0 18px;
+
+  color: var(--muted);
+
+  font-size: 0.8rem;
+}
+
+
+/* Hai đường kẻ hai bên chữ */
+
+.divider::before,
+.divider::after {
+  content: "";
+
+  flex: 1;
+
+  height: 1px;
+
+  background: var(--border);
+}
+
+
+/* =========================================================
+   13. SOCIAL LOGIN
+   ---------------------------------------------------------
+   Chứa các nút:
+   - Google
+   - Facebook
+
+   Grid giúp 2 nút nằm cạnh nhau.
+   ========================================================= */
+
+.social {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 12px;
+}
+
+
+/* Nút Google / Facebook */
+
+.btn-social {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 11px;
+
+  font-size: 0.92rem;
+  font-weight: 600;
+
+  color: var(--text);
+
+  background: #fff;
+
+  border: 1.5px solid var(--border);
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+
+/* Hiệu ứng hover */
+
+.btn-social:hover {
+  background: #f9fafb;
+
+  border-color: #d1d5db;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+
+/* =========================================================
+   14. ICON SOCIAL
+   ---------------------------------------------------------
+   Icon được tách thành class riêng để HTML không phải
+   chứa SVG dài.
+
+   Icon thật có thể được thêm bằng:
+   - CSS
+   - thư viện icon
+   - file SVG riêng
+   ========================================================= */
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+
+  flex-shrink: 0;
+}
+
+
+/* =========================================================
+   15. RESPONSIVE - MOBILE
+   ---------------------------------------------------------
+   Khi màn hình nhỏ hơn 480px:
+   -> giảm padding của card
+   -> giúp form không bị quá chật
+   ========================================================= */
+
+@media (max-width: 480px) {
+  .card {
+    padding: 24px 20px 28px;
+  }
+}
