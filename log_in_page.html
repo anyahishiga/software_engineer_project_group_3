@@ -16,36 +16,19 @@
 
 <body>
 
-  <!-- =====================================================
-       CONTAINER CHÍNH
-       -----------------------------------------------------
-       .card là khung trắng chứa toàn bộ giao diện
-       Login / Signup.
-       ===================================================== -->
+    <!--CONTAINER CHÍNH .card là khung trắng chứa toàn bộ giao diện Login / Signup-->
 
   <main class="card">
 
 
-    <!-- ===================================================
-         1. RADIO ĐIỀU KHIỂN TAB
-         ---------------------------------------------------
-         Không cần JavaScript.
-
-         Radio Login được checked mặc định
-         -> hiển thị form Login.
-
-         Khi chọn Signup
-         -> CSS tự động hiển thị form Signup.
-         =================================================== -->
+  <!-- 1. RADIO ĐIỀU KHIỂN TAB Khi chọn Signup CSS tự động hiển thị form Signup.-->
 
     <input type="radio" name="tab" id="tab-login" checked>
 
     <input type="radio" name="tab" id="tab-signup">
 
 
-    <!-- ===================================================
-         2. TAB LOGIN / SIGNUP
-         =================================================== -->
+    <!-- 2. TAB LOGIN / SIGNUP -->      <!--h --> 
 
     <div class="tabs">
 
@@ -65,9 +48,7 @@
     </div>
 
 
-    <!-- ===================================================
-         3. FORM ĐĂNG NHẬP
-         =================================================== -->
+    <!-- 3. FORM ĐĂNG NHẬP-->
 
     <form class="form form-login" action="#" method="post">
 
@@ -86,7 +67,7 @@
         <label for="login-user">
           Tên đăng nhập
         </label>
-
+    <!-- ô để nhập tài khoản mật khẩu -->
         <input type="text" id="login-user" name="username" placeholder="Nhập tên đăng nhập" required
           autocomplete="username">
 
@@ -124,18 +105,7 @@
       </div>
 
 
-      <!-- =================================================
-           SOCIAL LOGIN
-           -------------------------------------------------
-           Không nhúng SVG dài trực tiếp vào HTML.
-
-           Icon hiện tại dùng ký hiệu đơn giản.
-           Sau này có thể thay bằng:
-           - Font Awesome
-           - Lucide
-           - Bootstrap Icons
-           - SVG file riêng
-           ================================================= -->
+      <!-- SOCIAL LOGIN-->
 
       <div class="social">
 
@@ -158,9 +128,7 @@
 
 
 
-    <!-- ===================================================
-         4. FORM ĐĂNG KÝ
-         =================================================== -->
+    <!--4. FORM ĐĂNG KÝ -->
 
     <form class="form form-signup" action="#" method="post">
 
@@ -224,11 +192,7 @@
       </div>
 
 
-      <!-- =================================================
-           SOCIAL SIGNUP
-           -------------------------------------------------
-           Dùng cùng cấu trúc với Login để dễ bảo trì.
-           ================================================= -->
+      <!--SOCIAL SIGNUP Dùng cùng cấu trúc với Login để dễ bảo trì. -->
 
       <div class="social">
 
@@ -245,6 +209,9 @@
           Facebook
         </button>
 
+
+
+        
       </div>
 
     </form>
@@ -252,7 +219,10 @@
   </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <!--link để tới trang javasript -->
   <script src="log_in_page.js"></script>
+
+  
 </body>
 
 </html>
