@@ -12,23 +12,23 @@
 
 
 /* =========================================================
-   2. BIẾN MÀU DÙNG CHUNG (Sáng, dịu mắt)
+   2. BIẾN MÀU DÙNG CHUNG (Glassmorphism & Sáng dịu)
    ========================================================= */
 
 :root {
   --primary: #0ea5e9;
   --primary-dark: #0284c7;
 
-  --text: #0f172a;
-  --muted: #64748b;
+  --text: #ffffff;           /* Đổi thành chữ trắng cho nổi bật trên nền ảnh */
+  --muted: #cbd5e1;
 
-  --border: #e2e8f0;
-  --bg-input: #f8fafc;
+  --border: rgba(255, 255, 255, 0.2);
+  --bg-input: rgba(255, 255, 255, 0.08);
 }
 
 
 /* =========================================================
-   3. BODY (Thêm hiệu ứng nền chuyên động - Animated Gradient)
+   3. BODY (Thêm hình nền phong cách như trong video)
    ========================================================= */
 
 body {
@@ -49,30 +49,14 @@ body {
 
   color: var(--text);
 
-  /* Gradient 4 màu dịu mắt */
-  background: linear-gradient(
-    -45deg,
-    #f0f9ff,
-    #e0f2fe,
-    #bae6fd,
-    #f1f5f9
-  );
-  background-size: 400% 400%;
-  
-  /* Tạo chuyển động nền mượt mà */
-  animation: gradientBG 12s ease infinite;
-}
-
-/* Keyframes hiệu ứng nền động */
-@keyframes gradientBG {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  /* Hình nền chất lượng cao giống phong cách trong video */
+  background: #0f172a url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=1920&auto=format&fit=crop') no-repeat center center fixed;
+  background-size: cover;
 }
 
 
 /* =========================================================
-   4. CARD - KHUNG FORM CHÍNH
+   4. CARD - KHUNG FORM CHÍNH (Hiệu ứng kính mờ Glassmorphism)
    ========================================================= */
 
 .card {
@@ -83,26 +67,16 @@ body {
 
   padding: 32px 32px 36px;
 
-  background: #fff;
+  /* Hiệu ứng kính mờ (Glassmorphism) */
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 20px;
 
   box-shadow:
-    0 20px 40px rgba(14, 165, 233, 0.08);
-
-  /* Hiệu ứng trượt xuất hiện lúc mới tải trang */
-  animation: cardAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes cardAppear {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+    0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 
@@ -127,7 +101,7 @@ body {
 
   margin-bottom: 28px;
 
-  background: #f1f5f9;
+  background: rgba(255, 255, 255, 0.1);
 
   border-radius: 12px;
 
@@ -161,19 +135,19 @@ body {
   width: calc(50% - 4px);
   height: calc(100% - 8px);
 
-  background: #fff;
+  background: rgba(255, 255, 255, 0.9);
 
   border-radius: 9px;
 
   box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.05);
+    0 2px 6px rgba(0, 0, 0, 0.2);
 
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s ease;
 }
 
 #tab-login:checked ~ .tabs label[for="tab-login"],
 #tab-signup:checked ~ .tabs label[for="tab-signup"] {
-  color: var(--primary);
+  color: #0f172a;
 }
 
 #tab-signup:checked ~ .tabs .indicator {
@@ -182,7 +156,7 @@ body {
 
 
 /* =========================================================
-   7. HIỂN THỊ FORM THEO TAB (Có chuyển động Fade In)
+   7. HIỂN THỊ FORM THEO TAB
    ========================================================= */
 
 .form {
@@ -246,6 +220,7 @@ body {
 
   font-size: 0.85rem;
   font-weight: 600;
+  color: var(--text);
 }
 
 .field input {
@@ -268,8 +243,7 @@ body {
   transition:
     border-color 0.2s,
     box-shadow 0.2s,
-    background 0.2s,
-    transform 0.15s;
+    background 0.2s;
 }
 
 .field input::placeholder {
@@ -277,12 +251,12 @@ body {
 }
 
 .field input:focus {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.15);
 
   border-color: var(--primary);
 
   box-shadow:
-    0 0 0 4px rgba(14, 165, 233, 0.15);
+    0 0 0 4px rgba(14, 165, 233, 0.25);
 }
 
 
@@ -302,18 +276,15 @@ body {
   color: var(--primary);
 
   text-decoration: none;
-  
-  transition: opacity 0.2s;
 }
 
 .forgot:hover {
   text-decoration: underline;
-  opacity: 0.85;
 }
 
 
 /* =========================================================
-   11. NÚT CHÍNH (Thêm hiệu ứng nẩy nhẹ khi rê chuột)
+   11. NÚT CHÍNH
    ========================================================= */
 
 .btn-primary {
@@ -338,18 +309,15 @@ body {
 
   transition:
     background 0.2s,
-    transform 0.15s,
-    box-shadow 0.2s;
+    transform 0.1s;
 }
 
 .btn-primary:hover {
   background: var(--primary-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
 }
 
 .btn-primary:active {
-  transform: translateY(0) scale(0.98);
+  transform: scale(0.98);
 }
 
 
@@ -409,7 +377,7 @@ body {
 
   color: var(--text);
 
-  background: #fff;
+  background: rgba(255, 255, 255, 0.05);
 
   border: 1.5px solid var(--border);
 
@@ -420,23 +388,16 @@ body {
   transition:
     background 0.2s,
     border-color 0.2s,
-    transform 0.15s,
     box-shadow 0.2s;
 }
 
 .btn-social:hover {
-  background: #f8fafc;
+  background: rgba(255, 255, 255, 0.12);
 
-  border-color: #cbd5e1;
-
-  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.4);
 
   box-shadow:
-    0 4px 10px rgba(0, 0, 0, 0.04);
-}
-
-.btn-social:active {
-  transform: translateY(0);
+    0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 
@@ -464,7 +425,7 @@ body {
 
 
 /* =========================================================
-   16. NÚT ẨN/HIỆN MẬT KHẨU
+   16. NÚT ẨN/HIỆN MẬT KHẨU 
    ========================================================= */
 
 .input-wrap {
@@ -493,19 +454,14 @@ body {
   border-radius: 8px; 
 
   cursor: pointer;
-
-  transition: background 0.2s, transform 0.1s;
 }
 
 .toggle-pass:hover {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-.toggle-pass:active {
-  transform: translateY(-50%) scale(0.9);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .toggle-pass img {
   width: 20px;
   height: 20px;
+  filter: invert(1); /* Tự động đổi màu icon con mắt sang trắng cho dễ nhìn trên nền tối */
 }
