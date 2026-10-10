@@ -22,14 +22,14 @@
 
 :root {
 
-  --primary: #38d591b5;
-  --primary-dark: #5be6488f;
+  --primary: #00e5a0;
+  --primary-dark: #00b351;
 
-  --text: #110d0582;
-  --muted: #eaeae2;
+  --text: #e2e8f0;
+  --muted: #8b9a94;
 
-  --border: #e9ede4f0;
-  --bg-input: #e5f0e8e3;
+  --border: #1d2c26;
+  --bg-input: #121e1a;
 }
 
 
@@ -61,9 +61,8 @@ body {
   background:
     linear-gradient(
       135deg,
-      #0f0f195a 0%,
-      #0a071130 50%,
-      #15020c 100%
+       #0d1d17 0%,
+       #060a08 100%
     );
 }
 
@@ -86,9 +85,10 @@ body {
   /*           */
   padding: 32px 32px 36px;
 
-  background: #fff;
+  background: #0b1411;
 
   border-radius: 20px;
+   border: 1px solid #182822;
 
   box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.25);
@@ -129,7 +129,7 @@ body {
 
   margin-bottom: 28px;
 
-  background: #f3f4f6;
+  background: #121e1a;
 
   border-radius: 12px;
 
@@ -169,7 +169,7 @@ body {
   width: calc(50% - 4px);
   height: calc(100% - 8px);
 
-  background: #fff;
+  background: #1a2a24;
 
   border-radius: 9px;
 
@@ -250,6 +250,7 @@ body {
 .form h1 {
   font-size: 1.6rem;
   margin-bottom: 4px;
+   color: #ffffff;
 }
 
 
@@ -286,6 +287,7 @@ body {
 
   font-size: 0.85rem;
   font-weight: 600;
+  color: #d1d5db;
 }
 
 
@@ -318,19 +320,19 @@ body {
 /* Màu chữ placeholder */
 
 .field input::placeholder {
-  color: #9ca3af;
+  color: #4b5563;
 }
 
 
 /* Hiệu ứng khi click vào input */
 
 .field input:focus {
-  background: #fff;
+  background: #16241f;
 
   border-color: var(--primary);
 
   box-shadow:
-    0 0 0 4px rgba(79, 70, 229, 0.12);
+    0 0 0 4px rgba(0, 229, 153, 0.15);
 }
 
 
@@ -378,7 +380,7 @@ body {
   font-size: 1rem;
   font-weight: 600;
 
-  color: #fff;
+  color: #050b08;
 
   background: var(--primary);
 
@@ -480,7 +482,7 @@ body {
 
   color: var(--text);
 
-  background: #fff;
+  background: #121e1a;
 
   border: 1.5px solid var(--border);
 
@@ -498,12 +500,12 @@ body {
 /* Hiệu ứng hover */
 
 .btn-social:hover {
-  background: #f9fafb;
+  background: #182822;
 
-  border-color: #d1d5db;
+  border-color: #273e35;
 
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.06);
+    0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 
