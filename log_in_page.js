@@ -1,11 +1,8 @@
 "use strict";
 
-
 //Đăng nhập / Đăng ký bằng JavaScript (demo phía client)
 //Dữ liệu người dùng lưu trong localStorage
 
-
-  
 const USERS_KEY = "demo_users";
 const SESSION_KEY = "demo_session";
 
@@ -24,7 +21,7 @@ function getUsers() {
   }
 }
 
-//lưu danh sách người dùng vào localStorage 
+//lưu danh sách người dùng vào localStorage
 function saveUsers(users) {
   localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
@@ -36,7 +33,7 @@ function getSession() {
 // mã hóa mật khẩu bằng SHA-256 (nếu trình duyệt hỗ trợ)
 async function hashPassword(password) {
   if (!window.crypto || !crypto.subtle) {
-// Nếu trình duyệt không hỗ trợ, trả về mật khẩu gốc (không an toàn)
+    // Nếu trình duyệt không hỗ trợ, trả về mật khẩu gốc (không an toàn)
     return "plain:" + password;
   }
   const data = new TextEncoder().encode(password);
@@ -75,10 +72,6 @@ function showFormError(form, message) {
   box.classList.add("show");
 }
 
-
-
-
-
 /* ---------- Chuẩn bị giao diện (thêm lỗi + nút ẩn/hiện mật khẩu) ---------- */
 function setupForm(form) {
   form.noValidate = true; // dùng kiểm tra riêng thay vì popup mặc định
@@ -113,42 +106,37 @@ function setupForm(form) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "toggle-pass";
-      btn.textContent = "Hiện";
       btn.setAttribute("aria-label", "Hiện hoặc ẩn mật khẩu");
+      // Icon con mắt (file svg nằm trong thư mục pic)
+      const icon = document.createElement("img");
+      icon.src = "pic/eyes.svg";
+      icon.alt = "";
+      btn.appendChild(icon);
       btn.addEventListener("click", () => {
-        const show = input.type === "password";
-        input.type = show ? "text" : "password";
-        btn.textContent = show ? "Ẩn" : "Hiện";
+      const show = input.type === "password";
+      input.type = show ? "text" : "password";
+      icon.src = show ? "pic/eyes-off.svg" : "pic/eyes.svg"; 
       });
       wrap.appendChild(btn);
     }
   });
 }
 
-
-
-
-
 /* ---------- Kiểm tra dữ liệu ---------- */
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 
-function validateUsername(value) {
+function Valid_Data_Username(value) {
   if (!value) return "Vui lòng nhập tên đăng nhập.";
   if (!USERNAME_RE.test(value))
     return "3–20 ký tự, chỉ gồm chữ cái, số và dấu gạch dưới (_).";
   return "";
 }
 
-function validatePassword(value) {
+function Valid_Data_Password(value) {
   if (!value) return "Vui lòng nhập mật khẩu.";
   if (value.length < 6) return "Mật khẩu phải có ít nhất 6 ký tự.";
   return "";
 }
-
-
-
-
-
 
 /* ---------- Trạng thái đăng nhập ---------- */
 function renderSession() {
@@ -165,11 +153,6 @@ function renderSession() {
     if (profile) profile.hidden = true;
   }
 }
-
-
-
-
-
 
 /* ---------- Đăng nhập ---------- */
 loginForm.addEventListener("submit", async (e) => {
@@ -197,17 +180,11 @@ loginForm.addEventListener("submit", async (e) => {
     return;
   }
 
-
-// Lưu trạng thái đăng nhập và chuyển sang trang home
+  // Lưu trạng thái đăng nhập và chuyển sang trang home
   localStorage.setItem(SESSION_KEY, record.username);
   // Chuyển hướng sang trang home.html khi đăng nhập thành công
   window.location.href = "home.html";
 });
-
-
-
-
-
 
 /* ---------- Đăng ký ---------- */
 signupForm.addEventListener("submit", async (e) => {
@@ -222,24 +199,19 @@ signupForm.addEventListener("submit", async (e) => {
   const password = Pass_Input.value;
   const confirm = Confirm_Input.value;
 
-
-
-// Kiểm tra dữ liệu nếu sai
-  const User_error = validateUsername(User_Name);
-  const Pass_Error = validatePassword(password);
+  // Kiểm tra dữ liệu nếu sai
+  const User_error = Valid_Data_Username(User_Name);
+  const Pass_Error = Valid_Data_Password(password);
   let Confirm_Error = "";
 
-
-  if(!confirm) Confirm_Error = "Vui lòng nhập lại mật khẩu.";
-  else if (confirm !== password) Confirm_Error = "Mật khẩu nhập lại không khớp.";
+  if (!confirm) Confirm_Error = "Vui lòng nhập lại mật khẩu.";
+  else if (confirm !== password)
+    Confirm_Error = "Mật khẩu nhập lại không khớp.";
 
   setFieldError(User_Input, User_error);
   setFieldError(Pass_Input, Pass_Error);
   setFieldError(Confirm_Input, Confirm_Error);
   if (User_error || Pass_Error || Confirm_Error) return;
-
-
-
 
   const users = getUsers();
   // Kiểm tra tên đăng nhập đã tồn tại chưa
@@ -248,14 +220,12 @@ signupForm.addEventListener("submit", async (e) => {
     setFieldError(User_Input, "Tên đăng nhập này đã được sử dụng.");
     return;
   }
-// Lưu thông tin người dùng mới
+  // Lưu thông tin người dùng mới
   users[key] = {
     username: User_Name,
     passwordHash: await hashPassword(password),
     createdAt: new Date().toISOString(),
   };
-
-
 
   saveUsers(users);
 
@@ -263,11 +233,6 @@ signupForm.addEventListener("submit", async (e) => {
   signupForm.reset();
   window.location.href = "home.html";
 });
-
-
-
-
-
 
 /* ---------- Đăng xuất ---------- */
 const logoutButton = document.getElementById("logout-btn");
@@ -279,11 +244,6 @@ if (logoutButton) {
   });
 }
 
-
-
-
-
-
 /* ---------- Nút Google / Facebook (chưa kết nối) ---------- */
 document.querySelectorAll(".btn-social").forEach((btn) => {
   btn.addEventListener("click", () => {
@@ -292,11 +252,6 @@ document.querySelectorAll(".btn-social").forEach((btn) => {
     // TODO: gọi OAuth thật (Firebase Auth, Google Identity Services, Facebook SDK...)
   });
 });
-
-
-
-
-
 
 /* ---------- Khởi tạo ---------- */
 setupForm(loginForm);
