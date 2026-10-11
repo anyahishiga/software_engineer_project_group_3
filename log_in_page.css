@@ -14,22 +14,21 @@
 
 
 /* =========================================================
-   2. BIẾN MÀU DÙNG CHUNG
+   2. BIẾN MÀU DÙNG CHUNG (Sáng và dịu mắt)
    ---------------------------------------------------------
    Khai báo màu tại đây để các thành viên dễ thay đổi
    giao diện mà không cần tìm và sửa nhiều chỗ.
    ========================================================= */
 
 :root {
+  --primary: #10b981;
+  --primary-dark: #059669;
 
-  --primary: #0ea5e9;
-  --primary-dark: #0284c7; 
+  --text: #1e293b;
+  --muted: #64748b;
 
-  --text: #0f172a;
-  --muted: #64748b;  
-
-  --border: #e2e8f0; 
-  --bg-input: #f8fafc; 
+  --border: #cbd5e1;
+  --bg-input: #f8fafc;
 }
 
 
@@ -37,7 +36,7 @@
    3. BODY
    ---------------------------------------------------------
    Căn toàn bộ form vào giữa màn hình.
-   Background sử dụng gradient tím -> hồng.
+   Background sử dụng gradient nhẹ nhàng, sáng sủa.
    ========================================================= */
 
 body {
@@ -61,9 +60,9 @@ body {
   background:
     linear-gradient(
       135deg,
-      #f0f9ff 0%,
-      #e0f2fe 50%,
-      #bae6fd 100%
+      #f1f5f9 0%,
+      #e2e8f0 50%,
+      #cbd5e1 100%
     );
 }
 
@@ -83,7 +82,7 @@ body {
 
   width: 100%;
   max-width: 420px;
-  /*           */
+
   padding: 32px 32px 36px;
 
   background: #fff;
@@ -91,7 +90,7 @@ body {
   border-radius: 20px;
 
   box-shadow:
-    0 20px 60px rgba(14, 165, 233, 0.08);
+    0 20px 40px rgba(0, 0, 0, 0.08);
 }
 
 
@@ -100,10 +99,6 @@ body {
    ---------------------------------------------------------
    Radio được sử dụng để chuyển giữa Login và Signup
    mà không cần JavaScript.
-
-   Người dùng không nhìn thấy radio, nhưng CSS vẫn sử dụng
-   trạng thái :checked của chúng để xác định form nào
-   đang được hiển thị.
    ========================================================= */
 
 .card > input[type="radio"] {
@@ -174,7 +169,7 @@ body {
   border-radius: 9px;
 
   box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.05);
+    0 2px 6px rgba(0, 0, 0, 0.06);
 
   transition: transform 0.3s ease;
 }
@@ -199,12 +194,6 @@ body {
    7. HIỂN THỊ FORM THEO TAB
    ---------------------------------------------------------
    Mặc định cả 2 form đều bị ẩn.
-
-   Khi radio Login được checked:
-       -> hiện .form-login
-
-   Khi radio Signup được checked:
-       -> hiện .form-signup
    ========================================================= */
 
 .form {
@@ -331,7 +320,7 @@ body {
   border-color: var(--primary);
 
   box-shadow:
-    0 0 0 4px rgba(14, 165, 233, 0.15);
+    0 0 0 4px rgba(16, 185, 129, 0.15);
 }
 
 
@@ -411,10 +400,6 @@ body {
 
 /* =========================================================
    12. DIVIDER - "HOẶC"
-   ---------------------------------------------------------
-   Tạo đường kẻ:
-   
-   -------- hoặc tiếp tục với --------
    ========================================================= */
 
 .divider {
@@ -447,12 +432,6 @@ body {
 
 /* =========================================================
    13. SOCIAL LOGIN
-   ---------------------------------------------------------
-   Chứa các nút:
-   - Google
-   - Facebook
-
-   Grid giúp 2 nút nằm cạnh nhau.
    ========================================================= */
 
 .social {
@@ -501,7 +480,7 @@ body {
 .btn-social:hover {
   background: #f8fafc;
 
-  border-color: #cbd5e1;
+  border-color: #94a3b8;
 
   box-shadow:
     0 2px 8px rgba(0, 0, 0, 0.04);
@@ -510,14 +489,6 @@ body {
 
 /* =========================================================
    14. ICON SOCIAL
-   ---------------------------------------------------------
-   Icon được tách thành class riêng để HTML không phải
-   chứa SVG dài.
-
-   Icon thật có thể được thêm bằng:
-   - CSS
-   - thư viện icon
-   - file SVG riêng
    ========================================================= */
 
 .social-icon {
@@ -530,10 +501,6 @@ body {
 
 /* =========================================================
    15. RESPONSIVE - MOBILE
-   ---------------------------------------------------------
-   Khi màn hình nhỏ hơn 480px:
-   -> giảm padding của card
-   -> giúp form không bị quá chật
    ========================================================= */
 
 @media (max-width: 480px) {
@@ -541,55 +508,46 @@ body {
     padding: 24px 20px 28px;
   }
 }
+
+
 /* =========================================================
    16. NÚT ẨN/HIỆN MẬT KHẨU 
    ---------------------------------------------------------
-   =>input-wrap  : bọc quanh ô mật khẩu 
-   =>toggle-pass : con mắt 
+   => input-wrap : bọc quanh ô mật khẩu 
+   => toggle-pass : con mắt 
    ========================================================= */
- 
+
 .input-wrap {
   position: relative;
 }
- 
+
 /* vị trí đặt mắt */
 .input-wrap input {
   padding-right: 46px;
 }
- 
+
 .toggle-pass {
-/* dán nổi con mắt lên ô password */
   position: absolute;
   top: 50%;
   right: 8px;
   transform: translateY(-50%);
- 
-  /*  Phần căn icon vào giữa nút  */
+
   display: flex; 
-  align-items: center;      /* căn giữa theo chiều dọc */
-  justify-content: center;  /* căn giữa theo chiều ngang */
- 
-  /* kích thước viền */
+  align-items: center; 
+  justify-content: center; 
+
   width: 32px;
   height: 32px;
   
- /* giao diện con mắt */
-  background: transparent;   /* bỏ nền xàm của icon -> trong suốt */
-  border: none;              /* bỏ viền */
-  border-radius: 8px;        /* bo góc khi ấn tab để chuyển mục */
- 
+  background: transparent; 
+  border: none; 
+  border-radius: 8px; 
+
   cursor: pointer;
 }
- 
 
- 
 /* kích thước mắt hiển thị */
 .toggle-pass img {
   width: 20px;
   height: 20px;
-
 }
- 
-
-
-
