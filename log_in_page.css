@@ -1,8 +1,4 @@
-/* =========================================================
-   1. RESET CSS
-   ---------------------------------------------------------
-   Xóa margin/padding mặc định của trình duyệt.
-   ========================================================= */
+/* 1. RESET CSS */
 
 * {
   box-sizing: border-box;
@@ -10,26 +6,21 @@
   padding: 0;
 }
 
-
-/* =========================================================
-   2. BIẾN MÀU DÙNG CHUNG (Glassmorphism & Sáng dịu)
-   ========================================================= */
+/* 2. BIẾN MÀU */
 
 :root {
-  --primary: #0ea5e9;
-  --primary-dark: #0284c7;
 
-  --text: #ffffff;           /* Đổi thành chữ trắng cho nổi bật trên nền ảnh */
-  --muted: #cbd5e1;
+  --primary: #38d591b5;
+  --primary-dark: #5be6488f;
 
-  --border: rgba(255, 255, 255, 0.2);
-  --bg-input: rgba(255, 255, 255, 0.08);
+  --text: #110d0582;
+  --muted: #eaeae2;
+
+  --border: #e9ede4f0;
+  --bg-input: #e5f0e8e3;
 }
 
-
-/* =========================================================
-   3. BODY (Thêm hình nền phong cách như trong video)
-   ========================================================= */
+/* 3. GIAO DIỆN CHUNG */
 
 body {
   min-height: 100vh;
@@ -49,15 +40,16 @@ body {
 
   color: var(--text);
 
-  /* Hình nền chất lượng cao giống phong cách trong video */
-  background: #0f172a url('https://png.pngtree.com/thumb_back/fw800/background/20240731/pngtree-nice-nature-beautiful-background-image-image_16119595.jpg') no-repeat center center fixed;
-  background-size: cover;
+  background:
+    linear-gradient(
+      135deg,
+      #0f0f195a 0%,
+      #0a071130 50%,
+      #15020c 100%
+    );
 }
 
-
-/* =========================================================
-   4. CARD - KHUNG FORM CHÍNH (Hiệu ứng kính mờ Glassmorphism)
-   ========================================================= */
+/* 4. KHUNG FORM */
 
 .card {
   position: relative;
@@ -67,31 +59,21 @@ body {
 
   padding: 32px 32px 36px;
 
-  /* Hiệu ứng kính mờ (Glassmorphism) */
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: #fff;
 
-  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 20px;
 
   box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.4);
+    0 20px 60px rgba(0, 0, 0, 0.25);
 }
 
-
-/* =========================================================
-   5. RADIO BUTTON ĐIỀU KHIỂN TAB
-   ========================================================= */
+/* 5. ẨN RADIO ĐIỀU KHIỂN TAB */
 
 .card > input[type="radio"] {
   display: none;
 }
 
-
-/* =========================================================
-   6. TABS
-   ========================================================= */
+/* 6. THANH CHUYỂN TAB */
 
 .tabs {
   position: relative;
@@ -101,12 +83,14 @@ body {
 
   margin-bottom: 28px;
 
-  background: rgba(255, 255, 255, 0.1);
+  background: #f3f4f6;
 
   border-radius: 12px;
 
   padding: 4px;
 }
+
+/* Nội dung chữ của từng tab */
 
 .tabs label {
   position: relative;
@@ -126,6 +110,8 @@ body {
   transition: color 0.25s;
 }
 
+/* Nền trắng nằm phía sau tab đang được chọn */
+
 .indicator {
   position: absolute;
 
@@ -135,29 +121,30 @@ body {
   width: calc(50% - 4px);
   height: calc(100% - 8px);
 
-  background: rgba(255, 255, 255, 0.9);
+  background: #fff;
 
   border-radius: 9px;
 
   box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.2);
+    0 2px 6px rgba(0, 0, 0, 0.1);
 
   transition: transform 0.3s ease;
 }
 
+/* Đổi màu tab đang chọn */
+
 #tab-login:checked ~ .tabs label[for="tab-login"],
 #tab-signup:checked ~ .tabs label[for="tab-signup"] {
-  color: #0f172a;
+  color: var(--primary);
 }
+
+/* Trượt nền sang tab đăng ký */
 
 #tab-signup:checked ~ .tabs .indicator {
   transform: translateX(100%);
 }
 
-
-/* =========================================================
-   7. HIỂN THỊ FORM THEO TAB
-   ========================================================= */
+/* 7. HIỂN THỊ FORM */
 
 .form {
   display: none;
@@ -165,13 +152,19 @@ body {
   animation: fade 0.35s ease;
 }
 
+/* Form đăng nhập */
+
 #tab-login:checked ~ .form-login {
   display: block;
 }
 
+/* Form đăng ký */
+
 #tab-signup:checked ~ .form-signup {
   display: block;
 }
+
+/* Hiệu ứng chuyển form */
 
 @keyframes fade {
   from {
@@ -185,16 +178,14 @@ body {
   }
 }
 
-
-/* =========================================================
-   8. TIÊU ĐỀ FORM
-   ========================================================= */
+/* 8. TIÊU ĐỀ FORM */
 
 .form h1 {
   font-size: 1.6rem;
   margin-bottom: 4px;
-  color: var(--text);
 }
+
+/* Mô tả form */
 
 .subtitle {
   color: var(--muted);
@@ -204,14 +195,13 @@ body {
   margin-bottom: 24px;
 }
 
-
-/* =========================================================
-   9. INPUT FIELD
-   ========================================================= */
+/* 9. Ô NHẬP DỮ LIỆU */
 
 .field {
   margin-bottom: 16px;
 }
+
+/* Nhãn input */
 
 .field label {
   display: block;
@@ -220,8 +210,9 @@ body {
 
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--text);
 }
+
+/* Giao diện input */
 
 .field input {
   width: 100%;
@@ -246,23 +237,24 @@ body {
     background 0.2s;
 }
 
+/* Màu placeholder */
+
 .field input::placeholder {
-  color: #94a3b8;
+  color: #9ca3af;
 }
 
+/* Hiệu ứng khi nhập */
+
 .field input:focus {
-  background: rgba(255, 255, 255, 0.15);
+  background: #fff;
 
   border-color: var(--primary);
 
   box-shadow:
-    0 0 0 4px rgba(14, 165, 233, 0.25);
+    0 0 0 4px rgba(79, 70, 229, 0.12);
 }
 
-
-/* =========================================================
-   10. QUÊN MẬT KHẨU
-   ========================================================= */
+/* 10. QUÊN MẬT KHẨU */
 
 .forgot {
   display: block;
@@ -278,14 +270,13 @@ body {
   text-decoration: none;
 }
 
+/* Gạch chân khi hover */
+
 .forgot:hover {
   text-decoration: underline;
 }
 
-
-/* =========================================================
-   11. NÚT CHÍNH
-   ========================================================= */
+/* 11. NÚT ĐĂNG NHẬP / ĐĂNG KÝ */
 
 .btn-primary {
   width: 100%;
@@ -312,18 +303,19 @@ body {
     transform 0.1s;
 }
 
+/* Đổi màu khi rê chuột */
+
 .btn-primary:hover {
   background: var(--primary-dark);
 }
+
+/* Hiệu ứng khi nhấn */
 
 .btn-primary:active {
   transform: scale(0.98);
 }
 
-
-/* =========================================================
-   12. DIVIDER - "HOẶC"
-   ========================================================= */
+/* 12. ĐƯỜNG KẺ PHÂN CÁCH */
 
 .divider {
   display: flex;
@@ -338,6 +330,8 @@ body {
   font-size: 0.8rem;
 }
 
+/* Hai đường kẻ hai bên */
+
 .divider::before,
 .divider::after {
   content: "";
@@ -349,10 +343,7 @@ body {
   background: var(--border);
 }
 
-
-/* =========================================================
-   13. SOCIAL LOGIN
-   ========================================================= */
+/* 13. NÚT ĐĂNG NHẬP MẠNG XÃ HỘI */
 
 .social {
   display: grid;
@@ -361,6 +352,8 @@ body {
 
   gap: 12px;
 }
+
+/* Nút Google / Facebook */
 
 .btn-social {
   display: flex;
@@ -377,7 +370,7 @@ body {
 
   color: var(--text);
 
-  background: rgba(255, 255, 255, 0.05);
+  background: #fff;
 
   border: 1.5px solid var(--border);
 
@@ -391,19 +384,18 @@ body {
     box-shadow 0.2s;
 }
 
-.btn-social:hover {
-  background: rgba(255, 255, 255, 0.12);
+/* Hiệu ứng hover */
 
-  border-color: rgba(255, 255, 255, 0.4);
+.btn-social:hover {
+  background: #f9fafb;
+
+  border-color: #d1d5db;
 
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, 0.2);
+    0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-
-/* =========================================================
-   14. ICON SOCIAL
-   ========================================================= */
+/* 14. ICON SOCIAL */
 
 .social-icon {
   width: 20px;
@@ -412,56 +404,51 @@ body {
   flex-shrink: 0;
 }
 
-
-/* =========================================================
-   15. RESPONSIVE - MOBILE
-   ========================================================= */
+/* 15. GIAO DIỆN MOBILE */
 
 @media (max-width: 480px) {
   .card {
     padding: 24px 20px 28px;
   }
 }
-
-
-/* =========================================================
-   16. NÚT ẨN/HIỆN MẬT KHẨU 
-   ========================================================= */
+/* 16. ẨN/HIỆN MẬT KHẨU */
 
 .input-wrap {
   position: relative;
 }
 
+/* Vị trí icon mắt */
 .input-wrap input {
   padding-right: 46px;
 }
 
 .toggle-pass {
+/* Đặt icon trong ô mật khẩu */
   position: absolute;
   top: 50%;
   right: 8px;
   transform: translateY(-50%);
 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
+  /* Căn giữa icon */
+  display: flex;
+  align-items: center;      /* Căn giữa dọc */
+  justify-content: center;  /* Căn giữa ngang */
 
+  /* Kích thước nút */
   width: 32px;
   height: 32px;
-  
-  background: transparent; 
-  border: none; 
-  border-radius: 8px; 
+
+ /* Giao diện nút mắt */
+  background: transparent;   /* Nền trong suốt */
+  border: none;              /* Bỏ viền */
+  border-radius: 8px;        /* Bo góc */
 
   cursor: pointer;
 }
 
-.toggle-pass:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
+/* Kích thước icon mắt */
 .toggle-pass img {
   width: 20px;
   height: 20px;
-  filter: invert(1); /* Tự động đổi màu icon con mắt sang trắng cho dễ nhìn trên nền tối */
+
 }
