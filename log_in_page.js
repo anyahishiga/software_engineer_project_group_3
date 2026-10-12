@@ -109,13 +109,13 @@ function setupForm(form) {
       btn.setAttribute("aria-label", "Hiện hoặc ẩn mật khẩu");
       // Icon con mắt (file svg nằm trong thư mục pic)
       const icon = document.createElement("img");
-      icon.src = "pic/eyes.svg";
+      icon.src = "svg file/eyes.svg";
       icon.alt = "";
       btn.appendChild(icon);
       btn.addEventListener("click", () => {
       const show = input.type === "password";
       input.type = show ? "text" : "password";
-      icon.src = show ? "pic/eyes-off.svg" : "pic/eyes.svg"; 
+      icon.src = show ? "svg file/eyes-off.svg" : "svg file/eyes.svg"; 
       });
       wrap.appendChild(btn);
     }
