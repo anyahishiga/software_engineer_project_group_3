@@ -130,22 +130,9 @@ The project focuses on the main operations of restaurant order management, inclu
 
 Online payment integration will depend on the selected payment provider and the actual implementation.
 
-## 10. Future Improvements
 
-The system may be extended with additional features in the future, such as:
 
-- Ingredient and inventory management.
-- Promotions and discount codes.
-- Notifications when order statuses change.
-- Reports on the most frequently ordered dishes.
-- Improved user interfaces for mobile devices.
-- Additional payment methods and delivery service integrations.
 
-## 11. Project Status
-
-The project is currently in the requirements analysis and system design stage. The system features, database model, and user interfaces will be refined during the development process.
-
----
 
 **Project Name:** Restaurant Order Management System
 
