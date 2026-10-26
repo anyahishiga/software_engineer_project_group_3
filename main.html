@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RestroPress Restaurant</title>
+  <link rel="stylesheet" href="main.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="logo"></span><strong>RestroPress Restaurant</strong></div>
+    <nav id="nav">
+      <button class="nav-btn" data-view="order">Order Online</button>
+      <button class="nav-btn" data-view="cart">Cart <span class="badge" id="cartBadge">0</span></button>
+      <button class="nav-btn" data-view="checkout">Checkout</button>
+      <button class="nav-btn" data-view="dashboard">Customer Dashboard</button>
+      <button class="btn-primary" id="sandboxBtn">Create Sandbox</button>
+    </nav>
+  </header>
+  <main id="app" class="container"></main>
+  <div id="modalRoot"></div>
+  <div id="toast" class="toast"></div>
+  
+  <!-- Scripts separated for modularity (OOP style) -->
+  <script src="helpers.js"></script>
+  <script src="models.js"></script>
+  <script src="data.js"></script>
+  <script src="payment.js"></script>
+  <script src="modals.js"></script>
+  <script src="views.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
