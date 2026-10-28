@@ -1,141 +1,194 @@
-# Restaurant Order Management System
+# Restaurant Order Management System (ROMS)
 
-## 1. Introduction
+**Version:** 1.1  
+**Last Updated:** October 28, 2026
 
-The Restaurant Order Management System is a project designed to support restaurant operations, including menu management, order processing, food preparation, and payment management.
+## 1. Overview
 
-The system aims to make ordering more convenient for customers and help restaurant staff manage orders more efficiently. It also allows administrators to manage menu items, employee accounts, user permissions, and restaurant reports.
+The **Restaurant Order Management System (ROMS)** is a web-based application designed to simplify restaurant operations by allowing customers to browse menus, customize food orders, manage shopping carts, schedule pickups or deliveries, and complete payments.
 
-## 2. Project Objectives
+The system also provides order tracking, customer order history, menu administration, and user role management to support restaurant staff and administrators.
 
-- Manage menu items, categories, prices, and availability.
-- Allow customers to search for food, manage their shopping carts, and place orders.
-- Track orders throughout confirmation, food preparation, and serving or delivery.
-- Manage payments and store transaction information.
-- Control access based on user roles.
-- Support order tracking and revenue reporting.
+## 2. Features
 
-## 3. Main Features
+### 2.1. Menu Browsing and Search
 
-### 3.1. Customer Features
+- Display food items with names, descriptions, categories, sizes, prices, and images.
+- Organize menu items into categories:
+  - Burgers & Wraps
+  - Drinks & Desserts
+  - Pizza & Pasta
+  - Rice Bowls
+  - Starters
+- Search for food items by keyword.
+- Display available items for ordering.
 
-- View the menu and food details.
-- Search for dishes by name or keyword.
-- Browse dishes by category and sort them by price.
-- Add items to the shopping cart, update quantities, or remove items.
-- Place orders for dine-in, takeaway, or delivery.
-- Track order status.
-- Make payments and view order history.
+### 2.2. Shopping Cart
 
-### 3.2. Waiter Features
+- Add food items to the shopping cart.
+- Select item sizes when multiple sizes and prices are available.
+- Increase or decrease item quantities.
+- Add special instructions to individual items.
+- Edit or remove items from the cart.
+- Review selected items before checkout.
 
-- View order lists and order details.
-- Create orders for customers.
-- Confirm or reject orders.
-- Update serving and delivery statuses.
+### 2.3. Order Placement and Scheduling
 
-### 3.3. Kitchen Staff Features
+- Place orders through the checkout process.
+- Choose between **Pickup** and **Delivery**.
+- Schedule an order by selecting a date and time.
+- Support scheduled orders between 10:00 AM and 9:30 PM, as configured by the system.
+- Collect customer information, including first name, email, and phone number.
+- Collect billing address and require acceptance of the terms and conditions.
+- Calculate order totals, taxes, and item prices.
+- Generate a unique order number for order identification and tracking.
 
-- View the list of dishes that need to be prepared.
-- Check item quantities and special notes.
-- Update food preparation status, including pending, preparing, and completed.
+### 2.4. Customer Dashboard and Order Management
 
-### 3.4. Cashier Features
+- Allow customers to view their order history.
+- Display order numbers, customer names, item quantities, order types, scheduled times, payment methods, payment statuses, and total amounts.
+- Allow staff to review incoming orders and accept or reject them.
+- Allow kitchen staff to update food preparation statuses.
 
-- View invoices and order totals.
-- Record cash payments.
-- Check online payment results.
-- Review payment status for each order.
+### 2.5. Payment and Invoicing
 
-### 3.5. Administrator Features
+The system supports two payment methods:
+
+- **VietQR Bank Transfer:** Generate a QR code containing the configured bank account information, exact payment amount, and order-specific transfer reference (e.g., `RP1001`).
+- **Cash Payment:** Record the payment as unpaid until the customer pays upon receiving the order.
+
+Customers can scan the VietQR code using a supported banking application or e-wallet.
+
+### 2.6. Menu Administration
+
+Administrators can:
 
 - Add, update, and discontinue menu items.
 - Manage food categories.
-- Manage employee accounts and user roles.
-- Update or lock employee accounts.
-- Search for orders and view revenue reports.
+- Update item names, descriptions, images, and prices.
 
-## 4. Order Processing Workflow
+### 2.7. User Account and Role Management
 
-The basic workflow of the system is as follows:
+- Allow customers to create an account during checkout.
+- Support three user roles: Customer, Employee, and Administrator.
+- Allow administrators to create, update, and deactivate employee accounts.
+- Apply role-based access to system functions.
 
-1. Customers browse the menu and select their dishes.
-2. The system updates the shopping cart and calculates the subtotal.
-3. Customers provide the required information and submit their orders.
-4. The system validates order details and checks item availability.
-5. Restaurant staff confirm or reject the orders.
-6. Once an order is confirmed, kitchen staff receive the order details and prepare the food.
-7. Staff update the serving or delivery status.
-8. The system records payment information and updates the order status.
-9. Restaurant managers can search for orders and review revenue reports.
+## 3. User Roles
 
-The actual workflow may vary depending on the service type and payment method.
-
-## 5. System Actors
-
-| Actor | Description |
+| Role | Responsibilities |
 |---|---|
-| Customer | Browses the menu, places orders, makes payments, and tracks orders. |
-| Waiter | Creates and processes orders and updates serving statuses. |
-| Kitchen Staff | Views food preparation requests and updates preparation statuses. |
-| Cashier | Manages invoices and records payments. |
-| Administrator | Manages menu items, employee accounts, permissions, and reports. |
-| Payment Gateway | Processes online payment requests and returns transaction results. |
+| Customer | Browse menus, manage the cart, place orders, make payments, and view order history. |
+| Employee | Review incoming orders, accept or reject orders, and update order processing statuses according to assigned responsibilities. |
+| Administrator | Manage menus, categories, and employee accounts, and access authorized administrative functions. |
 
-## 6. System Design
+## 4. Non-Functional Requirements
 
-The project covers the following analysis and design components:
+### Performance
+- Target a response time of no more than 3 seconds for ordinary operations.
+- Display toast notifications for success and error messages.
+- Automatically dismiss toast notifications after approximately 2.2 seconds.
+- Navigate between major screens without reloading the entire page where supported by the implementation.
 
-- Functional Requirements: Defines the main functions of the system.
-- Non-Functional Requirements: Defines performance, security, usability, and reliability requirements.
-- Data Flow Diagram (DFD): Describes data flows and system processes.
-- Use Case Diagram: Represents system functions and interactions between actors and the system.
-- Class Diagram: Describes the main business classes and their relationships.
-- Data Model: Defines the database structure, tables, and relationships.
-- Interface Design: Describes the interfaces for customers and restaurant staff.
+### Security
+- Protect customer information and transaction data against unauthorized access.
+- Validate required fields and email formats before processing checkout submissions.
+- Restrict administrative functions according to user roles.
 
-## 7. Database Design
+### Usability and Compatibility
+- Use a grid-based layout to display food items.
+- Provide a responsive interface for desktop and mobile devices.
+- Use clear modals for item customization, ordering, and scheduling.
 
-The proposed relational database includes the following main tables:
+### Maintainability
+- Organize application logic into separate functional modules.
+- Separate business logic, data, views, modals, and application control.
+- Follow object-oriented programming principles where appropriate.
 
-| Table | Description |
+## 5. Project Structure
+
+The application is intended to separate its main responsibilities into the following modules:
+
+```text
+Restaurant-Order-Management-System/
+├── index.html
+├── css/
+│   └── style.css
+├── javascript/
+│   ├── Models.js
+│   ├── Data.js
+│   ├── Views.js
+│   ├── Modals.js
+│   └── App.js
+└── README.md
+```
+
+*Note: Update this structure to match the actual repository if your folders or filenames differ.*
+
+| File | Responsibility |
 |---|---|
-| Users | Stores user accounts, contact information, and roles. |
-| Categories | Stores food categories. |
-| MenuItems | Stores dish information, prices, and availability status. |
-| Orders | Stores general order information. |
-| OrderItems | Stores ordered dishes, quantities, unit prices, and line totals. |
-| Payments | Stores payment methods, amounts, and transaction statuses. |
-| DeliveryInfo | Stores delivery information for delivery orders. |
-| OrderStatusHistory | Stores the history of order status changes. |
+| `index.html` | Main application page and HTML structure. |
+| `style.css` | Styling, responsive layout, and visual components. |
+| `Models.js` | Business models and application data structures. |
+| `Data.js` | Menu data, categories, and related data definitions. |
+| `Views.js` | Rendering and updating user interface components. |
+| `Modals.js` | Modal dialogs for item details, editing, and checkout interactions. |
+| `App.js` | Main application logic and event handling. |
 
-Primary keys and foreign keys are used to maintain relationships and data consistency.
+## 6. Installation and Usage
 
-The unit price of each item is stored in the order details at the time the order is placed. This ensures that historical order totals remain unchanged when menu prices are updated.
+### Prerequisites
 
-## 8. Non-Functional Requirements
+- A modern web browser.
+- A code editor such as Visual Studio Code.
+- A local development server, such as the Live Server extension for Visual Studio Code, if required by the project's module loading configuration.
 
-The system is expected to meet the following requirements:
+### Getting Started
 
-- **Performance:** Common operations should respond within a target of three seconds under the expected workload.
-- **Security:** The system should authenticate users, enforce role-based access control, and protect account information.
-- **Usability:** The interface should be clear and easy to use on both computers and mobile devices.
-- **Data Integrity:** Order, order detail, and payment records should remain consistent.
-- **Compatibility:** The system should support common web browsers.
-- **Maintainability:** The system should be organized into clear components to make future updates easier.
+1. Clone or download the repository.
+2. Open the project folder in Visual Studio Code.
+3. Verify that the project files and directory structure are correct.
+4. Start the project using Live Server or another suitable local web server.
+5. Open the local URL provided by the server in your browser.
 
-## 9. Project Scope
+For a simple static version without module-loading requirements, opening `index.html` directly may also work.
 
-The project focuses on the main operations of restaurant order management, including menu management, order placement, order processing, payment management, user account management, and reporting.
+## 7. Payment Configuration
 
-Online payment integration will depend on the selected payment provider and the actual implementation.
+VietQR payments require valid bank account configuration, including the bank identifier, account number, and transfer reference format.
 
+Before using the system for real transactions:
 
+- Configure the correct bank account information.
+- Verify that the generated QR code contains the correct amount and transfer reference.
+- Implement payment verification before marking bank transfers as paid.
+- Do not store banking credentials or other secrets directly in publicly accessible source files.
 
+## 8. Current Scope and Limitations
 
+This README describes the system's intended functionality based on version 1.1 of the requirements specification.
 
-**Project Name:** Restaurant Order Management System
+Actual capabilities depend on the implemented source code. Features such as persistent database storage, authentication, authorization, payment gateway integration, and automatic bank transfer verification should not be considered production-ready unless they have been implemented and tested.
 
-**Document Version:** 1.0
+## 9. Future Improvements
 
-**Last Updated:** October 26, 2026
+Potential enhancements include:
+
+- Database integration for persistent menu, user, and order data.
+- Real-time order status updates.
+- Automated payment verification.
+- Sales reports and order statistics for administrators.
+- Inventory management and low-stock notifications.
+- Improved authentication and access control.
+
+## 10. Authors
+
+- Kiệt
+- Phát
+- Huy
+
+---
+
+**Project:** Restaurant Order Management System  
+**Version:** 1.1  
+**Documentation Date:** October 28, 2026
