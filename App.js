@@ -6,8 +6,8 @@ const CUSTOMER_VIEWS = ["home", "order", "cart", "checkout", "dashboard"];   // 
 
 class App {
   constructor() {
-    Store.init();        // lần đầu: nạp dữ liệu mẫu (Data.js, Users.js, Orders.js) vào localStorage
-    Store.loadMenu();    // từ đây MENU / CATEGORIES lấy từ localStorage
+    Store.loadMenu();    // dữ liệu đã được tải từ server trong Store.init() (xem cuối file)
+    Store.onError = msg => this.toast(msg);
 
     this.root = document.getElementById("app"); this.modalRoot = document.getElementById("modalRoot");
     this.cart = new Cart(); this.schedule = new PickupSchedule(); this.current = "home";
@@ -68,14 +68,15 @@ class App {
     this.views[this.current].mount(this.root);
   }
   onStorage(e) {
-    if (e.key === null) return location.reload();               // ai đó xóa toàn bộ storage → khởi động lại để nạp dữ liệu mẫu
-    if (!e.key.startsWith("rp_")) return;
-    if (e.key === KEYS.menu) { Store.loadMenu(); if (["home", "order"].includes(this.current)) return this.refresh(); }
-    this.tick();
+    if (e.key === null || e.key.startsWith("rp_")) this.tick();
   }
+  // Lấy dữ liệu mới từ server rồi cập nhật màn hình nếu có thay đổi
   tick() {
-    if (!this.allowed(this.current)) return this.refresh();   // vd. tài khoản vừa bị Admin khóa
-    this.views[this.current].onTick();
+    Store.refresh().then(({ menuChanged }) => {
+      if (menuChanged && ["home", "order"].includes(this.current)) return this.refresh();
+      if (!this.allowed(this.current)) return this.refresh();   // vd. tài khoản vừa bị Admin khóa
+      this.views[this.current].onTick();
+    }).catch(() => {});
   }
 
   /* --- dữ liệu đơn hàng (lưu trong localStorage qua Store) --- */
@@ -87,19 +88,25 @@ class App {
   get nextOrderId() { return Store.nextOrderId(); }
 
   // info: { name, phone, email, address }; payment: id phương thức thanh toán
-  placeOrder(info, payment) {
-
-    
+  async placeOrder(info, payment) {
+    if (this.placing) return;
     const gone = this.cart.items.find(c => !Store.isAvailable(c.item.id));   // món có thể vừa bị Admin ngừng bán
     if (gone) return this.toast(`"${gone.item.name}" is no longer available — please remove it from your cart`);
     const scheduleError = PickupSchedule.validate(this.schedule.date, this.schedule.time);
     if (scheduleError) return this.toast(scheduleError);
 
-    const id = this.nextOrderId;
     const lines = this.cart.items.map(Order.lineFrom); // chụp lại các món trước khi xoá giỏ hàng
-    Store.addOrder(new Order(id, lines, this.cart.total, this.schedule, info.name, payment, info));
-    Store.rememberOrder(id);
-    this.cart.clear(); this.toast(`Order #${id} placed successfully!`); this.navigate("dashboard");
+    this.placing = true;
+    try {
+      // Server tự cấp mã đơn và tính lại tổng tiền theo giá trong database
+      const id = await Store.addOrder(new Order(this.nextOrderId, lines, this.cart.total, this.schedule, info.name, payment, info));
+      Store.rememberOrder(id);
+      this.cart.clear(); this.toast(`Order #${id} placed successfully!`); this.navigate("dashboard");
+    } catch (err) {
+      this.toast(err.message);
+    } finally {
+      this.placing = false;
+    }
   }
 
   toast(msg) {
@@ -107,4 +114,13 @@ class App {
     clearTimeout(this._t); this._t = setTimeout(() => t.classList.remove("show"), 2200);
   }
 }
-document.addEventListener("DOMContentLoaded", () => new App());
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    await Store.init();   // tải thực đơn, tài khoản, đơn hàng từ server
+  } catch {
+    document.getElementById("app").innerHTML =
+      `<div class="box"><h2>Cannot connect to the server</h2><p>Start the backend (cd server → npm start) and open http://localhost:3000</p></div>`;
+    return;
+  }
+  new App();
+});
