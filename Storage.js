@@ -1,19 +1,17 @@
 "use strict";
 
-/* Lưu trữ giả lập bằng localStorage; các phần khác chỉ dùng Store.
-   Có thể thay DB/Store để chuyển sang backend. */
+/* Lưu trữ qua backend (server/server.js → SQL Server).
+   Các phần khác vẫn chỉ dùng Store như trước; Store giữ một bản sao dữ liệu (cache)
+   để đọc đồng bộ, và đồng bộ lại với server mỗi lần App.tick() chạy. */
 
-const SEED_VERSION = "v3";   // Tăng phiên bản khi đổi dữ liệu mẫu.
-const KEYS = {
-  seeded: "rp_seeded", users: "rp_users", menu: "rp_menu", orders: "rp_orders",
-  seq: "rp_order_seq", mine: "rp_my_orders", session: "rp_session",
-};
+const API_BASE = "/api";
+const KEYS = { mine: "rp_my_orders", session: "rp_session" };
 
 // Thực đơn hiện tại, được Views sử dụng trực tiếp.
 let MENU = [];         // Gồm cả món ngừng bán.
 let CATEGORIES = [];   // Danh mục có món đang bán.
 
-/* ---------- 1) DB ---------- */
+/* ---------- 1) Lưu trên trình duyệt: phiên đăng nhập và danh sách đơn của khách ---------- */
 
 // Dự phòng khi storage không khả dụng.
 class MemoryStorage {
@@ -30,7 +28,6 @@ const LOCAL = pickStorage("localStorage");
 const SESSION = pickStorage("sessionStorage");
 
 class DB {
-  // Storage chỉ nhận chuỗi nên dữ liệu được lưu dưới dạng JSON.
   static get(key, fallback = []) {
     try { const raw = LOCAL.getItem(key); return raw === null ? fallback : JSON.parse(raw); }
     catch { return fallback; }
@@ -41,40 +38,69 @@ class DB {
   static setSession(value) { value ? SESSION.setItem(KEYS.session, JSON.stringify(value)) : SESSION.removeItem(KEYS.session); }
 }
 
-/* ---------- 2) Store ---------- */
+/* ---------- 2) Gọi API ---------- */
+
+class Api {
+  static async request(method, path, body) {
+    const res = await fetch(API_BASE + path, {
+      method,
+      headers: body === undefined ? {} : { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
+    return data;
+  }
+  static get(path) { return Api.request("GET", path); }
+  static post(path, body) { return Api.request("POST", path, body); }
+  static put(path, body) { return Api.request("PUT", path, body); }
+  static patch(path, body = {}) { return Api.request("PATCH", path, body); }
+}
+
+/* ---------- 3) Store ---------- */
 
 class Store {
-  /* --- Khởi tạo / đặt lại --- */
+  static #cache = { users: [], menu: [], orders: [], nextId: 1001 };
+  static #menuSig = "";
 
-  // Nạp dữ liệu mẫu nếu chưa có hoặc sai phiên bản.
-  static init() {
-    if (DB.get(KEYS.seeded, null) !== SEED_VERSION) Store.seed();
+  // App gán hàm này để hiện thông báo khi server báo lỗi.
+  static onError = msg => console.error(msg);
+
+  /* --- Khởi tạo / đồng bộ --- */
+
+  static async init() { await Store.refresh(); }
+
+  // Tải lại toàn bộ dữ liệu từ server. Trả về { menuChanged } để App biết có cần vẽ lại thực đơn.
+  static async refresh() {
+    const [menu, users, orders, next] = await Promise.all([
+      Api.get("/menu"), Api.get("/users"), Api.get("/orders"), Api.get("/orders/next-id"),
+    ]);
+    Object.assign(Store.#cache, { menu, users, orders, nextId: next.id });
+    const sig = JSON.stringify(menu), menuChanged = sig !== Store.#menuSig;
+    if (menuChanged) { Store.#menuSig = sig; Store.loadMenu(); }
+    return { menuChanged };
   }
-  static seed() {
-    const orders = buildSeedOrders();
-    DB.set(KEYS.users, SEED_USERS);
-    DB.set(KEYS.menu, SEED_MENU.map(m => ({ available: true, ...m })));   // Mặc định món mẫu đang bán.
-    DB.set(KEYS.orders, orders);
-    DB.set(KEYS.seq, Math.max(1000, ...orders.map(o => o.id)) + 1);
-    DB.set(KEYS.mine, []);
-    DB.set(KEYS.seeded, SEED_VERSION);
+
+  // Ghi lên server; nếu lỗi thì báo và tải lại dữ liệu thật từ server.
+  static #write(promise) {
+    return promise
+      .then(() => Store.refresh())
+      .catch(err => { Store.onError(err.message); return Store.refresh().catch(() => {}); });
   }
+
   static reset() {
     Object.values(KEYS).forEach(k => DB.remove(k));
     DB.setSession(null);
-    Store.seed();
   }
 
   /* --- Tài khoản & phiên --- */
 
-  static users() { return DB.get(KEYS.users); }
+  static users() { return Store.#cache.users; }
 
-  // Trả về user hoặc thông báo lỗi.
-  static login(username, password) {
-    const u = Store.users().find(x => x.username.toLowerCase() === String(username).trim().toLowerCase());
-    if (!u || u.password !== password) return { error: "Incorrect username or password." };
-    if (u.status !== "Active") return { error: "This account is locked. Please contact an administrator." };
-    return { user: u };
+  // Trả về { user } hoặc { error }.
+  static async login(username, password) {
+    try { return await Api.post("/login", { username, password }); }
+    catch (err) { return { error: err.message }; }
   }
   static session() { return DB.getSession(); }
   static startSession(role, username = "") { DB.setSession({ role, username }); }
@@ -92,21 +118,21 @@ class Store {
   static addUser(username, password) {
     const users = Store.users(), name = username.trim();
     if (users.some(u => u.username.toLowerCase() === name.toLowerCase())) return "That username already exists.";
-    users.push({ user_id: Math.max(0, ...users.map(u => u.user_id)) + 1, username: name, password, role: "Staff", status: "Active" });
-    DB.set(KEYS.users, users);
+    users.push({ user_id: Math.max(0, ...users.map(u => u.user_id)) + 1, username: name, role: "Staff", status: "Active" });
+    Store.#write(Api.post("/users", { username: name, password }));
     return "";
   }
   static updateUser(userId, patch) {
-    const users = Store.users(), u = users.find(x => x.user_id === userId);
+    const u = Store.users().find(x => x.user_id === userId);
     if (!u) return;
-    Object.assign(u, patch);
-    DB.set(KEYS.users, users);
+    if (patch.status) u.status = patch.status;
+    Store.#write(Api.patch(`/users/${userId}`, patch));
   }
 
   /* --- Thực đơn --- */
 
   static loadMenu() {
-    MENU = DB.get(KEYS.menu).map(raw => new MenuItem(raw));
+    MENU = Store.#cache.menu.map(raw => new MenuItem(raw));
     CATEGORIES = [...new Set(MENU.filter(m => m.available).map(m => m.category))];
   }
   static allCategories() { return [...new Set(MENU.map(m => m.category))]; }
@@ -114,53 +140,53 @@ class Store {
 
   // Thêm món mới hoặc cập nhật món hiện có.
   static saveMenuItem(data) {
-    const list = DB.get(KEYS.menu);
+    const list = Store.#cache.menu;
     if (data.id) list.splice(list.findIndex(m => m.id === data.id), 1, data);
     else list.push({ ...data, id: Math.max(0, ...list.map(m => m.id)) + 1 });
-    DB.set(KEYS.menu, list);
     Store.loadMenu();
+    Store.#write(data.id ? Api.put(`/menu/${data.id}`, data) : Api.post("/menu", data));
   }
   // Ẩn món để giữ tham chiếu trong đơn cũ.
   static toggleAvailable(id) {
-    const list = DB.get(KEYS.menu), m = list.find(x => x.id === id);
+    const m = Store.#cache.menu.find(x => x.id === id);
     if (!m) return;
-    m.available = m.available === false;   // Đảo trạng thái kinh doanh.
-    DB.set(KEYS.menu, list);
+    m.available = m.available === false;
     Store.loadMenu();
+    Store.#write(Api.patch(`/menu/${id}/toggle`));
   }
 
   /* --- Đơn hàng --- */
 
-  static orders() { return DB.get(KEYS.orders).map(o => Order.fromJSON(o)); }
-  static nextOrderId() { return DB.get(KEYS.seq, 1001); }
+  static orders() { return Store.#cache.orders.map(o => Order.fromJSON(o)); }
+  static nextOrderId() { return Store.#cache.nextId; }
 
-  static addOrder(order) {
-    const list = DB.get(KEYS.orders);
-    list.unshift(order);
-    DB.set(KEYS.orders, list);
-    DB.set(KEYS.seq, order.id + 1);
+  // Gửi đơn lên server; trả về mã đơn do server cấp.
+  static async addOrder(order) {
+    const saved = await Api.post("/orders", order);
+    await Store.refresh().catch(() => {});
+    return saved.id;
   }
 
   // Đổi trạng thái nếu bước tiếp theo hợp lệ.
   static setStatus(id, status, reason = "") {
-    const list = DB.get(KEYS.orders), raw = list.find(o => o.id === id);
+    const raw = Store.#cache.orders.find(o => o.id === id);
     if (!raw || !Order.fromJSON(raw).nextSteps.some(([s]) => s === status)) return false;
     raw.status = status;
-    if (status === "Rejected") raw.rejectReason = reason;   // Lưu lý do từ chối.
-    if (status === "Completed" && raw.payment === "cash") raw.paid = true;   // Thu tiền mặt khi hoàn tất.
-    DB.set(KEYS.orders, list);
+    if (status === "Rejected") raw.rejectReason = reason;
+    if (status === "Completed" && raw.payment === "cash") raw.paid = true;
+    Store.#write(Api.patch(`/orders/${id}/status`, { status, reason }));
     return true;
   }
   static markPaid(id) {
-    const list = DB.get(KEYS.orders), raw = list.find(o => o.id === id);
+    const raw = Store.#cache.orders.find(o => o.id === id);
     if (!raw) return;
     raw.paid = true;
-    DB.set(KEYS.orders, list);
+    Store.#write(Api.patch(`/orders/${id}/paid`));
   }
   // Dùng phát hiện thay đổi dữ liệu đơn.
-  static ordersSignature() { return JSON.stringify(DB.get(KEYS.orders)); }
+  static ordersSignature() { return JSON.stringify(Store.#cache.orders); }
 
-  /* --- Lịch sử đơn khách --- */
+  /* --- Lịch sử đơn khách (lưu trên trình duyệt của khách) --- */
 
   static rememberOrder(id) {
     const ids = DB.get(KEYS.mine);
@@ -178,8 +204,6 @@ class Store {
 
   /* --- Thống kê Admin --- */
 
-  // Thống kê đơn trong ngày, không tính đơn bị từ chối.
-  // revenue: đã thu; expected: tổng giá trị; dishes: món bán chạy.
   static stats(day = isoDate(new Date())) {
     const today = Store.orders().filter(o => isoDate(new Date(o.createdAt)) === day && o.status !== "Rejected");
     const dishes = new Map();
