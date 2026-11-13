@@ -4,7 +4,7 @@
 /* Hiện thông tin nhân viên khi vào khu vực quản lý, ẩn thanh menu của khách. */
 body[data-mode="staff"] .userbox { display: flex; }
 /* Ẩn menu và các nút của khách (My orders / Change role / Cart) ở trang chào và trang nhân viên. */
-body[data-mode="welcome"] nav, body[data-mode="staff"] nav,
+body[data-mode="welcome"] #nav, body[data-mode="staff"] #nav,
 body[data-mode="welcome"] .actions, body[data-mode="staff"] .actions { display: none; }
 
 /* ========================================================================= */

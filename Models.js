@@ -93,7 +93,7 @@ class Order {
   // Dựng lại một đơn từ object đọc ra từ localStorage (JSON không giữ lại getter/phương thức)
   static fromJSON(obj) { return Object.assign(Object.create(Order.prototype), obj); }
   static lineFrom(c) {
-    return { name: c.item.name, img: c.item.img, size: c.item.hasSizes ? c.size.label : "", qty: c.qty, unitPrice: c.unitPrice, note: c.note, total: c.total };
+    return { itemId: c.item.id, sizeLabel: c.size.label, name: c.item.name, img: c.item.img, size: c.item.hasSizes ? c.size.label : "", qty: c.qty, unitPrice: c.unitPrice, note: c.note, total: c.total };
   }
   get items() { return this.lines.length; }
   get subtotal() { return this.lines.reduce((s, l) => s + l.total, 0); }

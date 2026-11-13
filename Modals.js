@@ -110,8 +110,8 @@ class LoginModal extends Modal {
     this.el.querySelector("#lUser").focus();
     this.el.addEventListener("keydown", e => { if (e.key === "Enter") this.onConfirm(); });
   }
-  onConfirm() {
-    const result = Store.login(this.el.querySelector("#lUser").value, this.el.querySelector("#lPass").value);
+  async onConfirm() {
+    const result = await Store.login(this.el.querySelector("#lUser").value, this.el.querySelector("#lPass").value);
     if (result.error) { this.el.querySelector("#lErr").textContent = result.error; return; }
     this.close(); this.onSuccess(result.user);
   }
