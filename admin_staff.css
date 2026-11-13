@@ -1,0 +1,117 @@
+/* ========================================================================= */
+/* Phân quyền hiển thị thanh điều hướng (Welcome / Staff / Admin). */
+/* ========================================================================= */
+/* Hiện thông tin nhân viên khi vào khu vực quản lý, ẩn thanh menu của khách. */
+body[data-mode="staff"] .userbox { display: flex; }
+/* Ẩn menu và các nút của khách (My orders / Change role / Cart) ở trang chào và trang nhân viên. */
+body[data-mode="welcome"] nav, body[data-mode="staff"] nav,
+body[data-mode="welcome"] .actions, body[data-mode="staff"] .actions { display: none; }
+
+/* ========================================================================= */
+/* Màn hình chào mừng và chọn vai trò (Welcome View). */
+/* ========================================================================= */
+/* Khung chọn vai trò Khách hàng hoặc Nhân viên căn giữa trang. */
+.welcome { max-width: 640px; margin: 40px auto; padding: 36px 28px; border-radius: 18px; color: #fff; background: var(--brand); text-align: center; box-shadow: 0 10px 30px rgba(178, 74, 34, 0.25); }
+.welcome h1 { margin: 6px 0 10px; font-size: 30px; }
+.welcome .eyebrow, .welcome .lead { color: rgba(255, 255, 255, 0.85); }
+.welcome .lead { margin: 0 0 24px; }
+.welcome .role-card { color: var(--ink); }
+.welcome .role-card:hover { border-color: #fff; background: #fff7f3; }
+.sub-lead { margin: -8px 0 28px; color: var(--muted); }
+.roles { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 560px) { .roles { grid-template-columns: 1fr; } }
+/* Thẻ chọn vai trò có hiệu ứng đổi màu khi di chuột. */
+.role-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 28px 16px; border: 1px solid var(--line); border-radius: 14px; background: #fff; font-size: 16px; }
+.role-card:hover { border-color: var(--brand); background: #f9ece6; }
+.role-card .ico { font-size: 40px; }
+.role-card small { color: var(--muted); font-size: 12px; }
+.link-btn { border: 0; color: var(--muted); background: none; font-size: 12px; text-decoration: underline; }
+.demo-reset { margin-top: 32px; }
+
+/* ========================================================================= */
+/* Bảng điều phối đơn hàng của nhân viên (Staff Dashboard). */
+/* ========================================================================= */
+/* Thanh tiêu đề lọc đơn đang xử lý / đã hoàn tất. */
+.board-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.muted { color: var(--muted); }
+/* Lưới hiển thị các thẻ đơn hàng ưu tiên. */
+.ocards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.ocard { padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.ocard.urgent { border: 2px solid var(--brand); background: #fff7f3; }
+.ocard header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+.ocard header strong { margin-right: 4px; font-size: 18px; }
+.ocard .meta { margin-bottom: 6px; color: var(--muted); font-size: 13px; }
+.ocard footer { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+/* Nhóm nút cập nhật trạng thái đơn và nút từ chối đơn. */
+.acts-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.acts-row button { padding: 8px 12px; font-size: 13px; }
+.btn-danger { border: 1px solid #fecaca; border-radius: 8px; color: #991b1b; background: #fee2e2; font-weight: 700; }
+/* Nhãn phân loại hình thức giao hàng và thời gian nhận món. */
+.tag { padding: 2px 9px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.tag.delivery { color: #5b21b6; background: #ede9fe; }
+.tag.pickup { color: #065f46; background: #d1fae5; }
+.tag.time { color: var(--ink); background: var(--soft); }
+
+/* ========================================================================= */
+/* Quản lý thực đơn và tài khoản nhân viên (Admin Dashboard). */
+/* ========================================================================= */
+/* Thanh tiêu đề bảng quản lý và hàng món đã ngừng bán. */
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.tbl small.inline { display: inline; }
+tr.off td { color: var(--muted); background: var(--soft); }
+.row-acts { white-space: nowrap; }
+
+/* ========================================================================= */
+/* Thống kê doanh thu và biểu đồ món bán chạy (Admin Analytics). */
+/* ========================================================================= */
+/* Các thẻ chỉ số tổng quan trong ngày. */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px; }
+.stat { display: flex; flex-direction: column; gap: 4px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; }
+.stat span, .stat small { color: var(--muted); font-size: 12px; }
+.stat strong { color: var(--brand); font-size: 24px; }
+/* Thanh tiến trình biểu diễn số lượng món đã đặt. */
+.qty-cell { width: 45%; }
+.bar-track { height: 10px; border-radius: 5px; background: var(--soft); }
+.bar-fill { height: 100%; border-radius: 5px; background: var(--brand); }
+
+/* ========================================================================= */
+/* Các lớp dùng trong StaffViews.js (bổ sung). */
+/* ========================================================================= */
+/* Tiêu đề dashboard, KPI và thanh lọc đơn. */
+.dash-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+.dash-head h1 { margin-bottom: 0; }
+.dash-right { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 13px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.kpi { display: flex; flex-direction: column; gap: 4px; padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+.kpi span, .kpi small { color: var(--muted); font-size: 12px; }
+.kpi strong { font-size: 28px; }
+.kpi.hot { border-color: var(--brand); background: #fff7f3; }
+.kpi.hot strong { color: var(--brand); }
+.board-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.board .segment button { padding: 7px 16px; }
+
+/* Thẻ đơn hàng của nhân viên. */
+.ocard .info-grid { display: flex; flex-direction: column; gap: 4px; margin-bottom: 6px; font-size: 13px; }
+.ocard .info-grid > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.lbl { min-width: 72px; color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.reject-reason { margin: 8px 0; padding: 8px 10px; border-radius: 8px; color: #991b1b; background: #fee2e2; font-size: 13px; }
+.ocard footer > div:first-child { display: flex; align-items: center; justify-content: space-between; }
+.tot { font-size: 16px; }
+.btn-outline { padding: 8px 12px; font-size: 13px; }
+.ocard .btn-primary, .ocard .btn-ghost { padding: 8px 12px; font-size: 13px; }
+.board .empty { padding: 40px 0; }
+
+/* Admin: tab, bảng, khung. */
+.admin-tabs { display: flex; gap: 6px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+.admin-tabs button { padding: 10px 14px; border: 0; border-bottom: 2px solid transparent; color: var(--muted); background: none; font-size: 14px; font-weight: 600; }
+.admin-tabs button.on { border-color: var(--brand); color: var(--brand); }
+.box.wide { width: 100%; }
+.box-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.box-head h2 { margin: 0; }
+.box-tools { display: flex; align-items: center; gap: 12px; }
+.item-cell { display: flex; align-items: center; gap: 10px; }
+.item-cell .thumb { width: 48px; height: 48px; }
+.chip { padding: 1px 8px; border-radius: 10px; color: var(--brand); background: #f9ece6; font-size: 11px; font-weight: 700; }
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: grid; grid-template-columns: minmax(120px, 30%) 1fr 36px; align-items: center; gap: 12px; font-size: 14px; }
+.bar-row b { text-align: right; }

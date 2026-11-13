@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Restaurant Order Management Group 3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="customer.css">
+  <link rel="stylesheet" href="admin_staff.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" data-view="home" href="#"><span class="logo">G3</span><strong>Restaurant Order Management<br>Group 3</strong></a>
+    <nav id="nav">
+      <button class="nav-btn" data-view="home">Home</button>
+      <button class="nav-btn" data-view="order">Menu</button>
+    </nav>
+    <div class="actions">
+      <button class="nav-btn" data-view="dashboard">My orders</button>
+      <button class="nav-btn" id="signInBtn">Sign in</button>
+      <button class="nav-btn" data-view="cart">Cart <span class="badge" id="cartBadge">0</span></button>
+    </div>
+  </header>
+  <main id="app" class="container"></main>
+  <div id="modalRoot"></div>
+  <div id="toast" class="toast"></div>
+
+  <!-- Thứ tự nạp script có ý nghĩa. -->
+  <script src="Helpers.js"></script>
+  <script src="Models.js"></script>
+  <script src="Data.js"></script>      <!-- Thực đơn mẫu. -->
+  <script src="Users.js"></script>     <!-- Tài khoản mẫu. -->
+  <script src="Orders.js"></script>    <!-- Đơn hàng mẫu. -->
+  <script src="Payment.js"></script>
+  <script src="Storage.js"></script>   <!-- DB/Store; sau dữ liệu mẫu. -->
+  <script src="Modals.js"></script>
+  <script src="Views.js"></script>
+  <script src="StaffViews.js"></script> <!-- Dashboard nhân viên và quản trị. -->
+  <script src="App.js"></script>
+</body>
+</html>
