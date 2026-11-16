@@ -18,6 +18,11 @@ class CartItem {
   get unitPrice() { return this.size.price; }
   get total() { return this.unitPrice * this.qty; }
 }
+
+
+
+
+
 class Cart {
   static TAX_RATE = 0.1;
   #items = []; #listeners = [];

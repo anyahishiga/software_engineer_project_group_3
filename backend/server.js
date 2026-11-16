@@ -9,7 +9,7 @@ const PORT = Number(process.env.PORT) || 3000;
 const TAX_RATE = 0.1;
 
 const dbConfig = {
-  server: process.env.DB_SERVER || "localhost",
+  server: process.env.DB_SERVER || "127.0.0.1",
   port: Number(process.env.DB_PORT) || 1433,
   database: process.env.DB_NAME || "restaurant_db",
   user: process.env.DB_USER || "restaurant_app",
@@ -423,8 +423,11 @@ app.use("/api", api);
 app.use("/api", (req, res) => res.status(404).json({ error: "Not found" }));
 
 const ROOT = path.join(__dirname, "..");
-app.use((req, res, next) => (/^\/(server|database|\.git)(\/|$)/i.test(req.path) ? res.sendStatus(404) : next()));
-app.use(express.static(ROOT, { index: "main.html", dotfiles: "deny" }));
+app.use((req, res, next) => (/^\/(backend|server|database|\.git)(\/|$)/i.test(req.path) ? res.sendStatus(404) : next()));
+app.use(express.static(ROOT, { index: "index.html", dotfiles: "deny" }));
+
+
+
 
 async function start() {
   try {

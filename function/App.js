@@ -1,7 +1,15 @@
 "use strict";
 
-const POLL_MS = 5000;                                      // chu kỳ tự làm mới (giây × 1000), bổ sung cho sự kiện "storage"
+
+
+
+// Chu kỳ tự làm mới dữ liệu: 5000 ms = 5 giây.
+// Dùng bổ sung cho sự kiện "storage" (vì sự kiện đó đôi khi không đáng tin 100%).
+const POLL_MS = 5000;                                      
+
 const ROLE_VIEWS = { staff: ["Staff", "Admin"], admin: ["Admin"] };   // view nhân viên → các vai trò được vào
+
+
 const CUSTOMER_VIEWS = ["home", "order", "cart", "checkout", "dashboard"];   // chỉ mở khi đã chọn "khách hàng"
 
 class App {
@@ -9,8 +17,12 @@ class App {
     Store.init();        // lần đầu: nạp dữ liệu mẫu (Data.js, Users.js, Orders.js) vào localStorage
     Store.loadMenu();    // từ đây MENU / CATEGORIES lấy từ localStorage
 
+
+
+
     this.root = document.getElementById("app"); this.modalRoot = document.getElementById("modalRoot");
-    this.cart = new Cart(); this.schedule = new PickupSchedule(); this.current = "home";
+    this.cart = new Cart(); this.schedule = new PickupSchedule(); this.current = "home";''
+    
     this.views = {
       home: new HomeView(this), order: new OrderView(this), cart: new CartView(this), checkout: new CheckoutView(this), dashboard: new DashboardView(this),
       staff: new StaffView(this), admin: new AdminView(this),
@@ -18,14 +30,27 @@ class App {
     this.cart.subscribe(() => this.refresh());
 
     document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", e => { e.preventDefault(); this.navigate(b.dataset.view); }));
+    
+    
+    // Nút "Đăng nhập" mở cửa sổ đăng nhập
     document.getElementById("signInBtn").addEventListener("click", () => this.openLogin());
 
-    // Đồng bộ giữa các tab cùng trình duyệt: tab khác ghi localStorage → sự kiện "storage"; thêm polling để chắc chắn
+
+
+    // Đồng bộ giữa các tab cùng trình duyệt:
     window.addEventListener("storage", e => this.onStorage(e));
     setInterval(() => this.tick(), POLL_MS);
 
+
+
+
     this.navigate(this.homeView());   // tải lại trang vẫn giữ phiên nhân viên đã đăng nhập (sessionStorage)
-  }
+  } // này là của hàm constructor
+
+
+
+
+
 
   /* --- phiên đăng nhập, phân quyền --- */
 
@@ -35,10 +60,18 @@ class App {
     const s = Store.sessionValid() ? this.session : null;
     return !s || s.role === "Customer" ? "home" : s.role === "Admin" ? "admin" : "staff";
   }
+
+
+
+
   openLogin() { new LoginModal(this.modalRoot, user => this.login(user)).open(); }
+
+
+   // Xử lý sau khi đăng nhập thành công
   login(user) { Store.startSession(user.role, user.username); this.toast(`Welcome, ${user.username}`); this.navigate(this.homeView()); }
   // Đăng xuất nhân viên → quay về trang khách (mặc định luôn là khách hàng)
   exit() { this.cart.clear(); Store.startSession("Customer"); this.navigate("home"); }
+
 
   // Trang nhân viên / quản trị chỉ mở khi đã đăng nhập đúng vai trò
   allowed(name) {
@@ -107,4 +140,7 @@ class App {
     clearTimeout(this._t); this._t = setTimeout(() => t.classList.remove("show"), 2200);
   }
 }
+
+
+// Khởi động ứng dụng khi DOM đã sẵn sàng
 document.addEventListener("DOMContentLoaded", () => new App());

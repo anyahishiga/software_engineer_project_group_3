@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Restaurant Order Management Group 3</title>
+
+
+  <!-- link css -->
+
+  <link rel="stylesheet" href="css/admin_staff.css">
+  <link rel="stylesheet" href="css/customer.css">
+
+
+</head>
+
+
+
+
+
+
+
+<body>
+
+  <header class="topbar">
+    <a class="brand" data-view="home" href="#"><span class="logo">G3</span><strong>Restaurant Order Management<br>Group 3</strong></a>
+    <nav id="nav">
+      <button class="nav-btn" data-view="home">Home</button>
+      <button class="nav-btn" data-view="order">Menu</button>
+    </nav>
+
+    <div class="actions">
+      <button class="nav-btn" data-view="dashboard">My orders</button>
+      <button class="nav-btn" id="signInBtn">Sign in</button>
+      <button class="nav-btn" data-view="cart">Cart <span class="badge" id="cartBadge">0</span></button>
+    </div>
+  </header>
+  <main id="app" class="container"></main>
+  <div id="modalRoot"></div>
+  <div id="toast" class="toast"></div>
+
+  <!-- Thứ tự nạp script có ý nghĩa. -->
+  <script src="function/Helpers.js"></script>     <!-- các hàm hỗ trợ  -->
+  <script src="function/Models.js"></script>      <!-- mô hình dữ liệu  -->
+  <script src="function/Data.js"></script>        <!-- Thực đơn  -->
+  <script src="function/Users.js"></script>       <!-- Tài khoản  -->
+  <script src="function/Orders.js"></script>      <!-- Đơn hàng  -->
+  <script src="function/Payment.js"></script>     <!-- Thanh toán  -->
+  <script src="function/Storage.js"></script>     <!--   dữ liệu  -->
+  <script src="function/Modals.js"></script>      <!-- phương thức hiển thị modal -->
+  <script src="function/Views.js"></script>       <!-- Giao diện  -->
+  <script src="function/StaffViews.js"></script>  <!-- Dashboard nhân viên và quản trị. -->
+  <script src="function/App.js"></script>         <!-- Ứng dụng chính  -->  
+</body>
+</html>
