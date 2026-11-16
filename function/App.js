@@ -131,7 +131,7 @@ class App {
   get orders() { return Store.orders(); }          // tất cả đơn — dành cho Nhân viên / Admin
   get myOrders() { return Store.myOrders(); }      // đơn của khách trên thiết bị này (+ đơn đã tra cứu)
 
-  
+
 
   //  Mã đơn kế tiếp — dùng làm nội dung chuyển khoản trên mã QR (RP1001...) và khi đặt đơn
   get nextOrderId() { return Store.nextOrderId(); }
@@ -176,3 +176,8 @@ class App {
 
 // Khởi động ứng dụng khi DOM đã sẵn sàng
 document.addEventListener("DOMContentLoaded", () => new App());
+
+
+
+
+//testing git
