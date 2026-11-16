@@ -5,7 +5,7 @@
 // Sửa file này không đổi ngay thực đơn đang chạy → đổi SEED_VERSION trong Storage.js (hoặc xóa localStorage) để nạp lại.
 
 const dish = (id, category, name, desc, price, img) =>
-  ({ id, category, name, desc, img: `images/${img}`, sizes: [{ label: "Default", price }] });
+      ({ id, category, name, desc, img: `images/${img}`, price });
 
 const SEED_MENU = [
   dish(1, "Main Dish", "Classic Cheeseburger", "Grilled beef patty, Cheddar cheese, pickles, lettuce and house sauce.", 85000, "cheeseburger.jpg"),

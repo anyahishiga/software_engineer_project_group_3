@@ -12,6 +12,12 @@ const ROLE_VIEWS = { staff: ["Staff", "Admin"], admin: ["Admin"] };   // view nh
 
 const CUSTOMER_VIEWS = ["home", "order", "cart", "checkout", "dashboard"];   // chỉ mở khi đã chọn "khách hàng"
 
+
+
+
+
+
+// đúng 1 class Ứng dụng chính
 class App {
   constructor() {
     Store.init();        // lần đầu: nạp dữ liệu mẫu (Data.js, Users.js, Orders.js) vào localStorage
@@ -23,6 +29,8 @@ class App {
     this.root = document.getElementById("app"); this.modalRoot = document.getElementById("modalRoot");
     this.cart = new Cart(); this.schedule = new PickupSchedule(); this.current = "home";''
     
+
+
     this.views = {
       home: new HomeView(this), order: new OrderView(this), cart: new CartView(this), checkout: new CheckoutView(this), dashboard: new DashboardView(this),
       staff: new StaffView(this), admin: new AdminView(this),
@@ -46,10 +54,6 @@ class App {
 
     this.navigate(this.homeView());   // tải lại trang vẫn giữ phiên nhân viên đã đăng nhập (sessionStorage)
   } // này là của hàm constructor
-
-
-
-
 
 
   /* --- phiên đăng nhập, phân quyền --- */
@@ -86,6 +90,8 @@ class App {
     if (!this.allowed(this.current)) this.current = this.homeView();
   }
 
+
+
   /* --- điều hướng & vẽ lại --- */
 
   navigate(name) {
@@ -100,24 +106,37 @@ class App {
     document.getElementById("cartBadge").textContent = this.cart.count;
     this.views[this.current].mount(this.root);
   }
+
+
+
+
+  /// Cập nhật dữ liệu khi có thay đổi trong localStorage (cùng tab hoặc khác tab)
   onStorage(e) {
     if (e.key === null) return location.reload();               // ai đó xóa toàn bộ storage → khởi động lại để nạp dữ liệu mẫu
     if (!e.key.startsWith("rp_")) return;
     if (e.key === KEYS.menu) { Store.loadMenu(); if (["home", "order"].includes(this.current)) return this.refresh(); }
     this.tick();
   }
+
+
+
+  // Cập nhật dữ liệu theo chu kỳ để đồng bộ giữa các tab trình duyệt
   tick() {
     if (!this.allowed(this.current)) return this.refresh();   // vd. tài khoản vừa bị Admin khóa
     this.views[this.current].onTick();
   }
 
-  /* --- dữ liệu đơn hàng (lưu trong localStorage qua Store) --- */
 
+  /* --- dữ liệu đơn hàng  --- */
   get orders() { return Store.orders(); }          // tất cả đơn — dành cho Nhân viên / Admin
   get myOrders() { return Store.myOrders(); }      // đơn của khách trên thiết bị này (+ đơn đã tra cứu)
 
+  
+
   //  Mã đơn kế tiếp — dùng làm nội dung chuyển khoản trên mã QR (RP1001...) và khi đặt đơn
   get nextOrderId() { return Store.nextOrderId(); }
+
+
 
   // info: { name, phone, email, address }; payment: id phương thức thanh toán
   placeOrder(info, payment) {
@@ -129,17 +148,30 @@ class App {
     if (scheduleError) return this.toast(scheduleError);
 
     const id = this.nextOrderId;
+
+
     const lines = this.cart.items.map(Order.lineFrom); // chụp lại các món trước khi xoá giỏ hàng
     Store.addOrder(new Order(id, lines, this.cart.total, this.schedule, info.name, payment, info));
     Store.rememberOrder(id);
     this.cart.clear(); this.toast(`Order #${id} placed successfully!`); this.navigate("dashboard");
   }
 
+
+  // Hiển thị thông báo dạng hàm toast 
   toast(msg) {
-    const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show");
-    clearTimeout(this._t); this._t = setTimeout(() => t.classList.remove("show"), 2200);
+    const t = document.getElementById("toast");
+     t.textContent = msg; t.classList.add("show");
+    clearTimeout(this._t);
+     this._t = setTimeout(() => t.classList.remove("show"), 2200);
   }
+
+
 }
+
+
+
+
+
 
 
 // Khởi động ứng dụng khi DOM đã sẵn sàng

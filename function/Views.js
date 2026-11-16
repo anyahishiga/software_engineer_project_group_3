@@ -1,22 +1,39 @@
 "use strict";
 
 
-//cấu hình các chế độ hiển thị và các thông tin khác
-
 // Thứ tự khai báo cũng là thứ tự hiển thị.
 const VIEW_MODES = {
   delivery: { label: "Delivery", icon: "" },
-  pickup:   { label: "Pickup",   icon: "" },
+  pickup: { label: "Pickup", icon: "" },
 };
 
-// Phương thức thanh toán nằm trong Payment.js.
 
+
+
+// Phương thức thanh toán nằm trong Payment.js.
 const RESTAURANT_NAME = "Restaurant Order Management Group 3";
 const OPEN_HOURS = "10:00 — 22:30";
 
 // 16 quận nội thành TP.HCM cho ô chọn District.
-const HCMC_DISTRICTS = ["District 1", "District 3", "District 4", "District 5", "District 6", "District 7", "District 8", "District 10",
-  "District 11", "District 12", "Binh Tan", "Binh Thanh", "Go Vap", "Phu Nhuan", "Tan Binh", "Tan Phu"];
+const HCMC_DISTRICTS = [
+  "District 1",
+   "District 3",
+    "District 4",
+     "District 5",
+      "District 6",
+       "District 7",
+        "District 8",
+         "District 10",
+
+  "District 11",
+   "District 12",
+    "Binh Tan",
+     "Binh Thanh",
+      "Go Vap",
+       "Phu Nhuan",
+        "Tan Binh",
+         "Tan Phu"
+        ];
 
 // Trường bắt buộc trong Checkout.
 const CHECKOUT_REQUIRED = ["email", "phone", "first", "addr1", "ward", "district"];
@@ -28,9 +45,9 @@ const DASHBOARD_COLUMNS = ["Order", "Customer", "Items", "Type", "When", "Paymen
 
 // Thông báo hiện cho khách
 const MESSAGES = {
-  cartEmpty:      "Your cart is empty",
+  cartEmpty: "Your cart is empty",
   requiredFields: "Please fill in the required fields",
-  acceptTerms:    "Please accept Terms & Conditions",
+  acceptTerms: "Please accept Terms & Conditions",
 };
 
 
@@ -113,6 +130,9 @@ class View {
 }
 
 
+
+
+
 /* ---------- 4a) Home ---------- */
 
 class HomeView extends View {
@@ -127,8 +147,8 @@ class HomeView extends View {
         <p>Online food ordering for your restaurant.</p><p>From menu to kitchen.</p>
         <p>A diverse culinary experience from Asian to European dishes, combining traditional and modern cuisine.</p>
         <button class="btn-outline" data-go="order">Explore the menu <span>→</span></button></div>
-      <div class="hero-photo"><img src="images/hero.jpg" alt="Restaurant interior"><div class="hours"><small>Open daily</small><strong>${OPEN_HOURS}</strong></div></div></section>
-      <section class="featured"><div class="section-head"><div><p class="eyebrow line-before">Featured dishes</p><h2>Our signatures</h2></div>
+       <div class="hero-photo"><img src="images/hero.jpg" alt="Restaurant interior"><div class="hours"><small>Open daily</small><strong>${OPEN_HOURS}</strong></div></div></section>
+        <section class="featured"><div class="section-head"><div><p class="eyebrow line-before">Featured dishes</p><h2>Our signatures</h2></div>
         <button class="link-arrow" data-go="order">View full menu <span>→</span></button></div>
       <div class="dish-grid four">${this.featuredHtml()}</div></section>`;
   }
@@ -136,6 +156,8 @@ class HomeView extends View {
 }
 
 /* ---------- 4b) Menu (Order Online) ---------- */
+
+
 
 class OrderView extends View {
   constructor(app) { super(app); this.category = "All"; this.query = ""; }
