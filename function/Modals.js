@@ -198,50 +198,36 @@ class LoginModal extends Modal {
 //   }
 // }
 
-// / chưa hoạt động 
-
-
-
-
-
-
-
-
-// // Tạo tài khoản nhân viên mới (user = null, vai trò luôn là Staff) hoặc sửa tài khoản: đổi mật khẩu + khóa / mở khóa
-// class UserModal extends Modal {
-//   constructor(root, user, onSave, isSelf = false) { super(root); Object.assign(this, { user, onSave, isSelf }); }
-//   title() { return this.user ? `Edit account: ${esc(this.user.username)}` : "New staff account"; }
-//   subtitle() { return this.user ? "Leave the password empty to keep it unchanged." : "New accounts get the Staff role."; }
-//   body() {
-//     const u = this.user;
-//     const name = u ? "" : `<div class="field"><label>Username *</label><input id="uName" autocomplete="off"></div>`;
-//     const status = u && !this.isSelf ? `<div class="field"><label>Status</label><select id="uStatus">
-//       <option value="Active" ${u.status === "Active" ? "selected" : ""}>Active</option><option value="Locked" ${u.status === "Locked" ? "selected" : ""}>Locked</option></select></div>` : "";
-//     return `${name}<div class="field"><label>${u ? "New password" : "Password *"}</label><input id="uPass" type="text" autocomplete="off"></div>${status}
-//       <p class="form-err" id="uErr"></p>`;
-//   }
-//   footer() { return `<button class="btn-ghost" data-act="cancel">Cancel</button><button class="btn-primary" data-act="ok">Save</button>`; }
-//   onConfirm() {
-//     const fail = text => { this.el.querySelector("#uErr").textContent = text; };
-//     const password = this.el.querySelector("#uPass").value;
-//     if (this.user) {
-//       if (password && password.length < 4) return fail("Password must be at least 4 characters.");
-//       const patch = {}, status = this.el.querySelector("#uStatus")?.value;
-//       if (password) patch.password = password;
-//       if (status) patch.status = status;
-//       if (Object.keys(patch).length) Store.updateUser(this.user.user_id, patch);
-//     } else {
-//       const username = this.el.querySelector("#uName").value.trim();
-//       if (!/^[A-Za-z0-9._-]{3,}$/.test(username)) return fail("Username: at least 3 characters, no spaces or accents.");
-//       if (password.length < 4) return fail("Password must be at least 4 characters.");
-//       const error = Store.addUser(username, password);
-//       if (error) return fail(error);
-//     }
-//     this.close(); this.onSave();
-//   }
-// }
-
-
-
-
-// chưa hoat động 
+// Tạo tài khoản nhân viên mới (user = null, vai trò luôn là Staff) hoặc sửa tài khoản: đổi mật khẩu + khóa / mở khóa
+class UserModal extends Modal {
+  constructor(root, user, onSave, isSelf = false) { super(root); Object.assign(this, { user, onSave, isSelf }); }
+  title() { return this.user ? `Edit account: ${esc(this.user.username)}` : "New staff account"; }
+  subtitle() { return this.user ? "Leave the password empty to keep it unchanged." : "New accounts get the Staff role."; }
+  body() {
+    const u = this.user;
+    const name = u ? "" : `<div class="field"><label>Username *</label><input id="uName" autocomplete="off"></div>`;
+    const status = u && !this.isSelf ? `<div class="field"><label>Status</label><select id="uStatus">
+      <option value="Active" ${u.status === "Active" ? "selected" : ""}>Active</option><option value="Locked" ${u.status === "Locked" ? "selected" : ""}>Locked</option></select></div>` : "";
+    return `${name}<div class="field"><label>${u ? "New password" : "Password *"}</label><input id="uPass" type="text" autocomplete="off"></div>${status}
+      <p class="form-err" id="uErr"></p>`;
+  }
+  footer() { return `<button class="btn-ghost" data-act="cancel">Cancel</button><button class="btn-primary" data-act="ok">Save</button>`; }
+  onConfirm() {
+    const fail = text => { this.el.querySelector("#uErr").textContent = text; };
+    const password = this.el.querySelector("#uPass").value;
+    if (this.user) {
+      if (password && password.length < 4) return fail("Password must be at least 4 characters.");
+      const patch = {}, status = this.el.querySelector("#uStatus")?.value;
+      if (password) patch.password = password;
+      if (status) patch.status = status;
+      if (Object.keys(patch).length) Store.updateUser(this.user.user_id, patch);
+    } else {
+      const username = this.el.querySelector("#uName").value.trim();
+      if (!/^[A-Za-z0-9._-]{3,}$/.test(username)) return fail("Username: at least 3 characters, no spaces or accents.");
+      if (password.length < 4) return fail("Password must be at least 4 characters.");
+      const error = Store.addUser(username, password);
+      if (error) return fail(error);
+    }
+    this.close(); this.onSave();
+  }
+}
