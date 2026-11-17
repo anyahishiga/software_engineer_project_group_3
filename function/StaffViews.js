@@ -115,8 +115,8 @@ class AdminView extends DashView {
   signature() { return this.tab === "orders" || this.tab === "analytics" ? this.board.signature() : ""; }
 
   tabsHtml() {
-    return `<nav class="admin-tabs">${ADMIN_TABS.map(([key, label]) =>
-      `<button class="${when(this.tab === key, "on")}" data-atab="${key}">${label}</button>`).join("")}</nav>`;
+    return `<div class="admin-tabs">${ADMIN_TABS.map(([key, label]) =>
+      `<button class="${when(this.tab === key, "on")}" data-atab="${key}">${label}</button>`).join("")}</div>`;
   }
 
   /* --- Menu --- */

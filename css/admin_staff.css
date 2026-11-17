@@ -129,9 +129,9 @@ tr.off td { color: var(--muted); background: var(--soft); }
 
 
 /* Admin: tab, bảng, khung. */
-.admin-tabs { display: flex; gap: 6px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
-.admin-tabs button { padding: 10px 14px; border: 0; border-bottom: 2px solid transparent; color: var(--muted); background: none; font-size: 14px; font-weight: 600; }
-.admin-tabs button.on { border-color: var(--brand); color: var(--brand); }
+.admin-tabs { display: flex; gap: 8px; margin: 16px 0 24px; flex-wrap: wrap; }
+.admin-tabs button { padding: 10px 18px; border-radius: 999px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
+.admin-tabs button.on { background: #a0522d; color: #fff; border-color: #a0522d; }
 .box.wide { width: 100%; }
 .box-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .box-head h2 { margin: 0; }

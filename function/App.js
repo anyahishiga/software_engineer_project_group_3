@@ -2,10 +2,7 @@
 
 
 
-
-// Chu kỳ tự làm mới dữ liệu: 5000 ms = 5 giây.
-// Dùng bổ sung cho sự kiện "storage" (vì sự kiện đó đôi khi không đáng tin 100%).
-const POLL_MS = 5000;                                      
+                        
 
 const ROLE_VIEWS = { staff: ["Staff", "Admin"], admin: ["Admin"] };   // view nhân viên → các vai trò được vào
 
