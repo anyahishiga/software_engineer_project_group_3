@@ -43,7 +43,7 @@ body[data-mode="welcome"] .actions, body[data-mode="staff"] .actions { display: 
 
 /* Lưới hiển thị các thẻ đơn hàng ưu tiên. */
 .ocards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
-.ocard { padding: 14px; border: 1px solid var(--line); border-radius: 0; background: #fff; }
+.ocard { padding: 14px; border: none; border-radius: 0; background: #fff; }
 .ocard.urgent { border: 2px solid var(--brand); background: #F4EFEA; }
 .ocard header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
 .ocard header strong { margin-right: 4px; font-size: 18px; }
@@ -56,7 +56,7 @@ body[data-mode="welcome"] .actions, body[data-mode="staff"] .actions { display: 
 /* Nhóm nút cập nhật trạng thái đơn và nút từ chối đơn. */
 .acts-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .acts-row button { padding: 8px 12px; font-size: 13px; }
-.btn-danger { border: 1px solid #fecaca; border-radius: 0; color: #991b1b; background: #fee2e2; font-weight: 700; }
+.btn-danger { border: none; border-radius: 0; color: #991b1b; background: #fee2e2; font-weight: 700; }
 
 
 
@@ -85,7 +85,7 @@ tr.off td { color: var(--muted); background: var(--soft); }
 /* Thống kê doanh thu và biểu đồ món bán chạy (Admin Analytics). */
 /* Các thẻ chỉ số tổng quan trong ngày. */
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px; }
-.stat { display: flex; flex-direction: column; gap: 4px; padding: 16px; border: 1px solid var(--line); border-radius: 0; }
+.stat { display: flex; flex-direction: column; gap: 4px; padding: 16px; border: none; border-radius: 0; background: #fff; }
 .stat span, .stat small { color: var(--muted); font-size: 12px; }
 .stat strong { color: var(--brand); font-size: 24px; }
 /* Thanh tiến trình biểu diễn số lượng món đã đặt. */
@@ -103,7 +103,7 @@ tr.off td { color: var(--muted); background: var(--soft); }
 .dash-head h1 { margin-bottom: 0; }
 .dash-right { display: flex; align-items: center; gap: 14px; color: var(--muted); font-size: 13px; }
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 18px; }
-.kpi { display: flex; flex-direction: column; gap: 4px; padding: 16px; border: 1px solid var(--line); border-radius: 0; background: #fff; }
+.kpi { display: flex; flex-direction: column; gap: 4px; padding: 16px; border: none; border-radius: 0; background: #fff; }
 .kpi span, .kpi small { color: var(--muted); font-size: 12px; }
 .kpi strong { font-size: 28px; }
 .kpi.hot { border-color: var(--brand); background: #F4EFEA; }
@@ -131,7 +131,8 @@ tr.off td { color: var(--muted); background: var(--soft); }
 .admin-tabs { display: flex; gap: 8px; margin: 16px 0 24px; flex-wrap: wrap; }
 .admin-tabs button { padding: 10px 18px; border-radius: 0; border: 1px solid #ddd; background: #fff; cursor: pointer; }
 .admin-tabs button.on { background: #8C6D53; color: #fff; border-color: #8C6D53; }
-.box.wide { width: 100%; }
+.box { border: none; background: #fff; padding: 16px; } /* Thêm/Chỉnh lớp box chung nếu có khung lớn */
+.box.wide { width: 100%; border: none; background: #fff; }
 .box-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .box-head h2 { margin: 0; }
 .box-tools { display: flex; align-items: center; gap: 12px; }
