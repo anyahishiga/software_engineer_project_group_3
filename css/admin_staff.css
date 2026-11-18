@@ -131,7 +131,7 @@ tr.off td { color: var(--muted); background: var(--soft); }
 /* Admin: tab, bảng, khung. */
 .admin-tabs { display: flex; gap: 8px; margin: 16px 0 24px; flex-wrap: wrap; }
 .admin-tabs button { padding: 10px 18px; border-radius: 999px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
-.admin-tabs button.on { background: #8C6D53; color: #fff; border-color: #8C6D53; }
+.admin-tabs button.on { background: #B2967D; color: #fff; border-color: #B2967D; }
 .box.wide { width: 100%; }
 .box-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .box-head h2 { margin: 0; }
