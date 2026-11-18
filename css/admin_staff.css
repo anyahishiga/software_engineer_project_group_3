@@ -62,17 +62,20 @@ body[data-mode="welcome"] .actions, body[data-mode="staff"] .actions { display: 
 
 
 /* Nhãn phân loại hình thức giao hàng và thời gian nhận món. */
-.tag { padding: 2px 9px; border-radius: 0; font-size: 11px; font-weight: 700; }
+.tag { padding: 2px 9px; border-radius: 0; font-size: 11px; font-weight: 700; color: var(--ink); background: transparent; }
 
 /* Pickup dùng màu mặc định, không còn nền xanh. */
 .tag.delivery { color: var(--ink); background: transparent; }
 .tag.pickup { color: var(--ink); background: transparent; }
 
-/* ASAP dùng màu mặc định và được đẩy sang bên phải. */
+/* ASAP đứng riêng bên phải. */
 .tag.time { margin-left: auto; color: var(--ink); background: transparent; }
 
 /* Pending dùng màu mặc định, không còn nền vàng. */
 .tag.pending { color: var(--ink); background: transparent; }
+
+/* Confirmed dùng màu mặc định, không còn nền xanh. */
+.tag.confirmed { color: var(--ink); background: transparent; }
 
 
 
