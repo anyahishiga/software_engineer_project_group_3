@@ -131,8 +131,7 @@ tr.off td { color: var(--muted); background: var(--soft); }
 .admin-tabs { display: flex; gap: 8px; margin: 16px 0 24px; flex-wrap: wrap; }
 .admin-tabs button { padding: 10px 18px; border-radius: 0; border: 1px solid #ddd; background: #fff; cursor: pointer; }
 .admin-tabs button.on { background: #8C6D53; color: #fff; border-color: #8C6D53; }
-.box { border: none; background: #fff; padding: 16px; } /* Thêm/Chỉnh lớp box chung nếu có khung lớn */
-.box.wide { width: 100%; border: none; background: #fff; }
+.box, .box.wide { width: 100%; border: none; background: #fff; border-radius: 0 !important; }
 .box-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .box-head h2 { margin: 0; }
 .box-tools { display: flex; align-items: center; gap: 12px; }
