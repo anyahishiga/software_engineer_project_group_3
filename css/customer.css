@@ -272,7 +272,7 @@ img.thumb { object-fit: cover; }
 .dish { position: relative; display: flex; flex-direction: column; padding: 10px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
 .dish[data-go] { cursor: pointer; }
 .dish-img { overflow: hidden; border-radius: 10px; background: var(--soft); aspect-ratio: 4 / 3; }
-.dish-img img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; }
+.dish-img img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
 .dish-meta { display: flex; align-items: center; justify-content: space-between; margin: 10px 0 2px; font-size: 12px; }
 .dish-meta .cat { color: var(--muted); }
 .dish-meta .price { position: static; color: var(--brand); font-size: 13px; font-weight: 700; }
@@ -372,3 +372,4 @@ nav .nav-btn.active { color: var(--ink); background: none; box-shadow: inset 0 -
   .topbar { display: flex; padding: 8px 12px; }
   .container { padding: 20px 16px 60px; }
   .hero-title { font-size: 36px; }
+}
