@@ -1,3 +1,4 @@
+```css
 /* Phân quyền hiển thị thanh điều hướng (Welcome / Staff / Admin). */
 /* Hiện thông tin nhân viên khi vào khu vực quản lý, ẩn thanh menu của khách. */
 body[data-mode="staff"] .userbox { display: flex; }
@@ -63,9 +64,9 @@ body[data-mode="welcome"] .actions, body[data-mode="staff"] .actions { display: 
 
 /* Nhãn phân loại hình thức giao hàng và thời gian nhận món. */
 .tag { padding: 2px 9px; border-radius: 0; font-size: 11px; font-weight: 700; }
-.tag.delivery { color: #5b21b6; background: #ede9fe; }
-.tag.pickup { color: #065f46; background: #d1fae5; }
-.tag.time { color: var(--ink); background: var(--soft); }
+.tag.delivery { color: var(--ink); background: transparent; }
+.tag.pickup { color: var(--ink); background: transparent; }
+.tag.time { color: var(--ink); background: transparent; }
 
 
 
@@ -141,3 +142,4 @@ tr.off td { color: var(--muted); background: var(--soft); }
 .bars { display: flex; flex-direction: column; gap: 10px; }
 .bar-row { display: grid; grid-template-columns: minmax(120px, 30%) 1fr 36px; align-items: center; gap: 12px; font-size: 14px; }
 .bar-row b { text-align: right; }
+```
