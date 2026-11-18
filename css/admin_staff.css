@@ -1,4 +1,3 @@
-```css
 /* Phân quyền hiển thị thanh điều hướng (Welcome / Staff / Admin). */
 /* Hiện thông tin nhân viên khi vào khu vực quản lý, ẩn thanh menu của khách. */
 body[data-mode="staff"] .userbox { display: flex; }
@@ -64,9 +63,19 @@ body[data-mode="welcome"] .actions, body[data-mode="staff"] .actions { display: 
 
 /* Nhãn phân loại hình thức giao hàng và thời gian nhận món. */
 .tag { padding: 2px 9px; border-radius: 0; font-size: 11px; font-weight: 700; }
+
+/* Pickup dùng màu mặc định, không còn nền xanh. */
 .tag.delivery { color: var(--ink); background: transparent; }
 .tag.pickup { color: var(--ink); background: transparent; }
-.tag.time { color: var(--ink); background: transparent; }
+
+/* Pending dùng màu mặc định, không còn nền màu. */
+.tag.pending { color: var(--ink); background: transparent; order: 2; }
+
+/* Confirmed dùng màu mặc định, không còn nền màu. */
+.tag.confirmed { color: var(--ink); background: transparent; order: 2; }
+
+/* ASAP dùng màu mặc định và đứng riêng về phía bên phải. */
+.tag.time { color: var(--ink); background: transparent; margin-left: auto; order: 3; }
 
 
 
@@ -142,4 +151,3 @@ tr.off td { color: var(--muted); background: var(--soft); }
 .bars { display: flex; flex-direction: column; gap: 10px; }
 .bar-row { display: grid; grid-template-columns: minmax(120px, 30%) 1fr 36px; align-items: center; gap: 12px; font-size: 14px; }
 .bar-row b { text-align: right; }
-```
