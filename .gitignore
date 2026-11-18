@@ -1,1 +1,1 @@
-node_modules/
+Set-Content -Path .gitignore -Value ".venv/`n__pycache__/`n*.pyc" -Encoding UTF8
