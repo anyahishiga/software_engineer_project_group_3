@@ -65,8 +65,8 @@ body[data-mode="welcome"] .actions, body[data-mode="staff"] .actions { display: 
 .tag { padding: 2px 9px; border-radius: 0; font-size: 11px; font-weight: 700; }
 .tag.delivery { color: var(--ink); background: transparent; }
 .tag.pickup { color: var(--ink); background: transparent; }
-.tag.pending { background: transparent; order: 2; }
-.tag.confirmed { background: transparent; order: 2; }
+.tag.pending { color: var(--ink); background: transparent; order: 2; }
+.tag.confirmed { color: var(--ink); background: transparent; order: 2; }
 .tag.time { color: var(--ink); background: transparent; margin-left: auto; order: 3; }
 
 
