@@ -64,7 +64,7 @@ class StaffView extends DashView {
     const address = o.mode === "delivery" && o.address ? `<div><span class="lbl">Address</span><span>${esc(o.address)}</span></div>` : "";
     return `<article class="ocard ${when(this.isUrgent(o), "urgent")}">
       <header><strong>#${o.id}</strong><span class="tag ${o.mode}">${o.mode}</span><span class="tag time">${o.isAsap ? "ASAP" : esc(o.time)}</span>
-        <span class="st ${st.cls} no-status-color">${st.label}</span></header>
+        <span class="st ${st.cls}">${st.label}</span></header>
       <div class="info-grid"><div><span class="lbl">Customer</span><b>${esc(o.customer)}</b><span>${esc(o.phone)}</span></div>${address}</div>
       <div class="lines">${OrderItemsModal.linesHtml(o.lines)}</div>
       ${when(o.status === "Rejected", `<div class="reject-reason"><span class="lbl">Rejection reason</span>${esc(o.rejectReason || "—")}</div>`)}
