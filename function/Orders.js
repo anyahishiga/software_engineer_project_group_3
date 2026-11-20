@@ -1,3 +1,5 @@
+// [API] KHÔNG CÒN DÙNG: đơn hàng giờ nằm trong MySQL và được tải qua /api/orders (không còn nạp đơn mẫu vào trình duyệt).
+// Giữ file này chỉ để tham khảo.
 "use strict";
 
 // DỮ LIỆU MẪU — vài đơn hàng để demo Staff Dashboard và Thống kê của Admin (xem Storage.js).

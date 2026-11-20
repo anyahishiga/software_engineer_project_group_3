@@ -1,3 +1,5 @@
+// [API] KHÔNG CÒN DÙNG: thực đơn giờ nằm trong MySQL (sql/restaurant_db_mysql.sql) và được tải qua /api/menu.
+// Giữ file này chỉ để tham khảo dữ liệu mẫu cũ; sửa ở đây sẽ KHÔNG đổi thực đơn đang chạy.
 "use strict";
 
 // DỮ LIỆU MẪU của thực đơn — chỉ dùng để nạp vào localStorage lần đầu (xem Storage.js).

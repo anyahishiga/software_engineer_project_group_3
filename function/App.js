@@ -17,8 +17,9 @@ const CUSTOMER_VIEWS = ["home", "order", "cart", "checkout", "dashboard"];   // 
 // đúng 1 class Ứng dụng chính
 class App {
   constructor() {
-    Store.init();        // lần đầu: nạp dữ liệu mẫu (Data.js, Users.js, Orders.js) vào localStorage
-    Store.loadMenu();    // từ đây MENU / CATEGORIES lấy từ localStorage
+    // [API] Dữ liệu giờ lấy từ server (MySQL), nên việc nạp dữ liệu chuyển sang start() bên dưới (bất đồng bộ).
+    this.ready = false;  // true sau khi nạp xong dữ liệu lần đầu
+    this.online = true;  // false khi mất kết nối server (để chỉ báo lỗi 1 lần)
 
 
 
@@ -49,8 +50,18 @@ class App {
 
 
 
-    this.navigate(this.homeView());   // tải lại trang vẫn giữ phiên nhân viên đã đăng nhập (sessionStorage)
+    this.start();   // [API] nạp dữ liệu từ server rồi mới vào trang đầu tiên
   } // này là của hàm constructor
+
+
+  // [API] Nạp dữ liệu từ server (thực đơn, đơn hàng...) rồi vào trang. Tải lại trang vẫn giữ phiên nhân viên đã đăng nhập (sessionStorage).
+  async start() {
+    this.root.innerHTML = `<p class="empty">Loading…</p>`;
+    const connected = await Store.init();
+    this.ready = true;
+    this.navigate(this.homeView());
+    if (!connected) this.toast("Cannot reach the server. Please try again.");
+  }
 
 
   /* --- phiên đăng nhập, phân quyền --- */
@@ -69,9 +80,14 @@ class App {
 
 
    // Xử lý sau khi đăng nhập thành công
-  login(user) { Store.startSession(user.role, user.username); this.toast(`Welcome, ${user.username}`); this.navigate(this.homeView()); }
+  // [API] user.token do server cấp; sync() để tải ngay danh sách đơn / tài khoản của nhân viên trước khi vẽ trang.
+  async login(user) {
+    Store.startSession(user.role, user.username, user.token);
+    await Store.sync(true);
+    this.toast(`Welcome, ${user.username}`); this.navigate(this.homeView());
+  }
   // Đăng xuất nhân viên → quay về trang khách (mặc định luôn là khách hàng)
-  exit() { this.cart.clear(); Store.startSession("Customer"); this.navigate("home"); }
+  exit() { this.cart.clear(); Store.clearPrivate(); Store.startSession("Customer"); this.navigate("home"); }
 
 
   // Trang nhân viên / quản trị chỉ mở khi đã đăng nhập đúng vai trò
@@ -107,19 +123,23 @@ class App {
 
 
 
-  /// Cập nhật dữ liệu khi có thay đổi trong localStorage (cùng tab hoặc khác tab)
+  /// Cập nhật khi tab khác trên cùng trình duyệt đổi localStorage (nay chỉ còn danh sách đơn của khách "rp_my_orders")
   onStorage(e) {
-    if (e.key === null) return location.reload();               // ai đó xóa toàn bộ storage → khởi động lại để nạp dữ liệu mẫu
+    if (e.key === null) return location.reload();               // ai đó xóa toàn bộ storage → tải lại trang
     if (!e.key.startsWith("rp_")) return;
-    if (e.key === KEYS.menu) { Store.loadMenu(); if (["home", "order"].includes(this.current)) return this.refresh(); }
     this.tick();
   }
 
 
 
-  // Cập nhật dữ liệu theo chu kỳ để đồng bộ giữa các tab trình duyệt
-  tick() {
+  // Cập nhật dữ liệu theo chu kỳ để đồng bộ giữa các máy / tab (hỏi lại server)
+  async tick() {
+    if (!this.ready) return;
+    const connected = await Store.sync();
+    if (!connected && this.online) this.toast("Lost connection to the server");   // chỉ báo 1 lần
+    this.online = connected;
     if (!this.allowed(this.current)) return this.refresh();   // vd. tài khoản vừa bị Admin khóa
+    if (Store.menuChanged && ["home", "order"].includes(this.current)) return this.refresh();   // thực đơn vừa đổi
     this.views[this.current].onTick();
   }
 
@@ -136,7 +156,8 @@ class App {
 
 
   // info: { name, phone, email, address }; payment: id phương thức thanh toán
-  placeOrder(info, payment) {
+  // [API] Gửi đơn lên server; server tính lại giá từ database và tự cấp mã đơn.
+  async placeOrder(info, payment) {
 
     
     const gone = this.cart.items.find(c => !Store.isAvailable(c.item.id));   // món có thể vừa bị Admin ngừng bán
@@ -144,13 +165,33 @@ class App {
     const scheduleError = PickupSchedule.validate(this.schedule.date, this.schedule.time);
     if (scheduleError) return this.toast(scheduleError);
 
-    const id = this.nextOrderId;
+    const expectedId = this.nextOrderId;   // mã đang hiện trên QR chuyển khoản
 
 
-    const lines = this.cart.items.map(Order.lineFrom); // chụp lại các món trước khi xoá giỏ hàng
-    Store.addOrder(new Order(id, lines, this.cart.total, this.schedule, info.name, payment, info));
-    Store.rememberOrder(id);
-    this.cart.clear(); this.toast(`Order #${id} placed successfully!`); this.navigate("dashboard");
+    // [API] Chỉ gửi mã món, size, số lượng, ghi chú — server tự lấy tên và giá từ database.
+    const lines = this.cart.items.map(c => ({ item_id: c.item.id, size: c.item.hasSizes ? c.size.label : "", qty: c.qty, note: c.note }));
+    if (this._placing) return;   // đang gửi đơn → bỏ qua lần bấm thứ hai (tránh tạo 2 đơn)
+    this._placing = true;
+    let result;
+    try {
+      result = await Store.addOrder({
+        info: { ...info, mode: this.schedule.mode, date: isoDate(this.schedule.date), time: this.schedule.time, payment },
+        lines,
+      });
+    } catch (e) {
+      return this.toast(e.message);   // vd. món vừa ngừng bán, giờ nhận không hợp lệ
+    } finally {
+      this._placing = false;
+    }
+    const id = result.id;
+    Store.rememberOrder(id, info.phone);
+    await Store.sync(true);             // tải lại để đơn mới hiện ngay ở "My orders"
+    this.cart.clear();
+    // Có người khác đặt đơn trong lúc khách quét QR → mã đơn thật khác mã trên QR, nhắc khách ghi đúng nội dung chuyển khoản
+    this.toast(payment === "bank" && id !== expectedId
+      ? `Order #${id} placed — please use ${orderCode(id)} as the transfer note`
+      : `Order #${id} placed successfully!`);
+    this.navigate("dashboard");
   }
 
 

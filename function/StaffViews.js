@@ -86,7 +86,11 @@ class StaffView extends DashView {
       const [id, status] = el.dataset.status.split(":");
       this.changeStatus(Number(id), status);
     });
-    bindAll(root, "[data-paid]", el => { Store.markPaid(Number(el.dataset.paid)); this.app.toast("Payment recorded"); this.app.refresh(); });
+    bindAll(root, "[data-paid]", async el => {   // [API] markPaid gọi server nên phải chờ (async)
+      try { await Store.markPaid(Number(el.dataset.paid)); this.app.toast("Payment recorded"); }
+      catch (e) { this.app.toast(e.message); }
+      this.app.refresh();
+    });
   }
 
   changeStatus(id, status) {
@@ -94,9 +98,14 @@ class StaffView extends DashView {
     this.applyStatus(id, status);
   }
 
-  applyStatus(id, status, reason = "") {
-    const ok = Store.setStatus(id, status, reason);
-    this.app.toast(ok ? `Order #${id}: ${ORDER_STATUS[status].label}` : `Order #${id} was just updated elsewhere — the list has been refreshed`);
+  // [API] setStatus gọi server nên là hàm async. Mất kết nối / hết phiên thì hiện lỗi từ server.
+  async applyStatus(id, status, reason = "") {
+    try {
+      const ok = await Store.setStatus(id, status, reason);
+      this.app.toast(ok ? `Order #${id}: ${ORDER_STATUS[status].label}` : `Order #${id} was just updated elsewhere — the list has been refreshed`);
+    } catch (e) {
+      this.app.toast(e.message);
+    }
     this.app.refresh();
   }
 
@@ -142,7 +151,11 @@ class AdminView extends DashView {
       const item = MENU.find(m => m.id === Number(el.dataset.editItem));
       if (item) new MenuItemModal(this.app.modalRoot, item, refresh).open();
     });
-    bindAll(root, "[data-toggle-item]", el => { Store.toggleAvailable(Number(el.dataset.toggleItem)); refresh(); });
+    bindAll(root, "[data-toggle-item]", async el => {   // [API] toggleAvailable gọi server nên phải chờ (async)
+      try { await Store.toggleAvailable(Number(el.dataset.toggleItem)); }
+      catch (e) { this.app.toast(e.message); }
+      refresh();
+    });
   }
 
   /* --- Analytics trong ngày --- */

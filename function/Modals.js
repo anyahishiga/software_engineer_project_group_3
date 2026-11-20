@@ -148,8 +148,13 @@ class LoginModal extends Modal {
     this.el.querySelector("#lUser").focus();
     this.el.addEventListener("keydown", e => { if (e.key === "Enter") this.onConfirm(); });
   }
-  onConfirm() {
-    const result = Store.login(this.el.querySelector("#lUser").value, this.el.querySelector("#lPass").value);
+  // [API] Đăng nhập qua server nên là hàm async.
+  async onConfirm() {
+    if (this.busy) return;   // đang chờ server → bỏ qua lần bấm thứ hai
+    this.busy = true;
+    const result = await Store.login(this.el.querySelector("#lUser").value, this.el.querySelector("#lPass").value);
+    this.busy = false;
+    if (!this.el) return;    // người dùng đã đóng hộp thoại trong lúc chờ
     if (result.error) { this.el.querySelector("#lErr").textContent = result.error; return; }
     this.close(); this.onSuccess(result.user);
   }
@@ -177,7 +182,8 @@ class MenuItemModal extends Modal {
       <p class="form-err" id="fErr"></p>`;
   }
   footer() { return `<button class="btn-ghost" data-act="cancel">Cancel</button><button class="btn-primary" data-act="ok">Save</button>`; }
-  onConfirm() {
+  // [API] Lưu qua server nên là hàm async; server từ chối thì hiện lỗi ngay trong hộp thoại.
+  async onConfirm() {
     const val = sel => this.el.querySelector(sel).value.trim();
     const fail = text => { this.el.querySelector("#fErr").textContent = text; };
     const name = val("#fName"), category = val("#fCat");
@@ -189,10 +195,12 @@ class MenuItemModal extends Modal {
       sizes.push({ label, price: n });
     }
     if (!sizes.length) return fail("At least one size with a price is required.");
-    Store.saveMenuItem({
-      id: this.item?.id, name, category, desc: val("#fDesc"), img: val("#fImg"), sizes,
-      available: this.el.querySelector("#fAvail").checked,
-    });
+    try {
+      await Store.saveMenuItem({
+        id: this.item?.id, name, category, desc: val("#fDesc"), img: val("#fImg"), sizes,
+        available: this.el.querySelector("#fAvail").checked,
+      });
+    } catch (e) { return fail(e.message); }
     this.close(); this.onSave();
   }
 }
@@ -216,7 +224,8 @@ class UserModal extends Modal {
       <p class="form-err" id="uErr"></p>`;
   }
   footer() { return `<button class="btn-ghost" data-act="cancel">Cancel</button><button class="btn-primary" data-act="ok">Save</button>`; }
-  onConfirm() {
+  // [API] Lưu qua server nên là hàm async.
+  async onConfirm() {
     const fail = text => { this.el.querySelector("#uErr").textContent = text; };
     const password = this.el.querySelector("#uPass").value;
     if (this.user) {
@@ -224,13 +233,14 @@ class UserModal extends Modal {
       const patch = {}, status = this.el.querySelector("#uStatus")?.value;
       if (password) patch.password = password;
       if (status) patch.status = status;
-      if (Object.keys(patch).length) Store.updateUser(this.user.user_id, patch);
+      try { if (Object.keys(patch).length) await Store.updateUser(this.user.user_id, patch); }
+      catch (e) { return fail(e.message); }
     } else {
       const username = this.el.querySelector("#uName").value.trim();
       if (!/^[A-Za-z0-9._-]{3,}$/.test(username)) return fail("Username: at least 3 characters, no spaces or accents.");
       if (password.length < 4) return fail("Password must be at least 4 characters.");
-      const error = Store.addUser(username, password);
-      if (error) return fail(error);
+      try { await Store.addUser(username, password); }   // server trả lỗi (vd. trùng tên) → ném ApiError
+      catch (e) { return fail(e.message); }
     }
     this.close(); this.onSave();
   }

@@ -402,16 +402,20 @@ class DashboardView extends View {
 
   bind(root) {
     bindAll(root, "[data-view-order]", el => {
-      const order = this.app.orders.find(o => o.id === Number(el.dataset.viewOrder));
+      const order = this.app.myOrders.find(o => o.id === Number(el.dataset.viewOrder));   // [API] khách chỉ có đơn của mình (this.app.orders là của nhân viên)
       if (order) new OrderItemsModal(this.app.modalRoot, order).open();
     });
     bindAll(root, "#lookupForm", (_, e) => { e.preventDefault(); this.lookup(e.target.elements); }, "submit");
   }
 
-  lookup(f) {
-    const order = Store.findOrder(f.code.value, f.phone.value);
+  // [API] Tra cứu qua server nên là hàm async.
+  async lookup(f) {
+    let order;
+    try { order = await Store.findOrder(f.code.value, f.phone.value); }
+    catch (e) { return this.app.toast(e.message); }
     if (!order) return this.app.toast("No order found — check the code and phone number");
-    Store.rememberOrder(order.id);
+    Store.rememberOrder(order.id, order.phone);
+    await Store.sync(true);   // tải lại danh sách đơn của khách
     this.app.toast(`Order #${order.id} added to your dashboard`);
     this.app.refresh();
   }

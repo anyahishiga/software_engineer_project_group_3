@@ -1,15 +1,20 @@
 "use strict";
 
 // Chu kỳ tự làm mới dữ liệu: 5000 ms = 5 giây.
-// Dùng bổ sung cho sự kiện "storage" (vì sự kiện đó đôi khi không đáng tin 100%).
+// Dùng để hỏi lại server xem có thay đổi gì không (đơn mới, đổi trạng thái, đổi thực đơn...).
 const POLL_MS = 5000;
-const SEED_VERSION = "v3";   // Tăng phiên bản khi đổi dữ liệu mẫu.
+
+// [API] Địa chỉ gốc của server. Chạy bằng Docker: nginx chuyển tiếp "/api/" sang server Python (xem docker/nginx.conf).
+// Chạy "python -m backend.app" thì server Python cũng phục vụ luôn giao diện nên giữ nguyên "/api".
+const API_BASE = "/api";
 
 
 
+// [API] Dữ liệu (tài khoản, thực đơn, đơn hàng) giờ nằm trong MySQL. Trình duyệt chỉ còn lưu 2 thứ:
+//   session: phiên đăng nhập (sessionStorage, mất khi đóng tab)
+//   mine   : mã đơn + số điện thoại của các đơn khách đã đặt trên thiết bị này (localStorage)
 const KEYS = {
-  seeded: "rp_seeded", users: "rp_users", menu: "rp_menu", orders: "rp_orders",
-  seq: "rp_order_seq", mine: "rp_my_orders", session: "rp_session",
+  mine: "rp_my_orders", session: "rp_session",
 };
 
 
@@ -51,42 +56,132 @@ class DB {
 
 
 
+// [API] Lỗi khi gọi server. message là câu hiển thị thẳng cho người dùng (server trả về trong trường "error").
+class ApiError extends Error {
+  constructor(message, status = 0) { super(message); this.status = status; }
+}
 
-// Lưu trữ dữ liệu mẫu, phiên bản, tài khoản, thực đơn, đơn hàng, đơn của khách trên thiết bị này.
+// [API] Gọi server và trả về dữ liệu JSON. Nhân viên / Admin đã đăng nhập thì tự gửi kèm token.
+async function api(path, { method = "GET", body } = {}) {
+  const headers = { "Content-Type": "application/json" };
+  const token = DB.getSession()?.token;
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  let res;
+  try {
+    res = await fetch(API_BASE + path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  } catch {
+    throw new ApiError("Cannot reach the server. Please try again.");
+  }
+
+  let data = null;
+  try { data = await res.json(); } catch { /* server không trả JSON */ }
+
+  if (!res.ok) {
+    if (res.status === 401 && token) Store.markSessionExpired();   // token hết hạn, hoặc tài khoản vừa bị khoá
+    throw new ApiError(data?.error || `Server error (${res.status})`, res.status);
+  }
+  return data;
+}
+
+
+
+
+// [API] Store giữ nguyên các hàm cũ để Views / Modals / App ít phải sửa.
+//   - Hàm ĐỌC (orders, users, myOrders, stats...) vẫn chạy ngay, lấy từ bộ nhớ tạm (cache) trong trang.
+//   - Cache được nạp từ server bởi Store.sync() — gọi lúc khởi động, sau mỗi thao tác ghi và mỗi POLL_MS.
+//   - Hàm GHI (login, addOrder, setStatus...) đổi thành async, gọi server rồi nạp lại cache.
 class Store {
 
+  // Cache dữ liệu lấy từ server.
+  static #rawMenu = "";           // JSON thực đơn lần trước, để biết thực đơn có đổi không
+  static #nextId = 1001;
+  static #orders = [];            // tất cả đơn — chỉ nhân viên / Admin mới tải được
+  static #mine = [];              // đơn của khách trên thiết bị này
+  static #users = [];             // danh sách tài khoản — chỉ Admin
+  static #stats = { count: 0, revenue: 0, expected: 0, dishes: [] };
+  static #sessionOk = true;       // false khi server báo token hết hạn / tài khoản bị khoá
+  static #syncing = null;         // lần sync đang chạy (tránh gọi chồng nhau)
+  static menuChanged = false;     // lần sync gần nhất có thấy thực đơn thay đổi không
 
-  // Nạp dữ liệu mẫu nếu chưa có hoặc sai phiên bản.
-  static init() {
-    if (DB.get(KEYS.seeded, null) !== SEED_VERSION) Store.seed();
-  }
-  static seed() {
-    const orders = buildSeedOrders();
-    DB.set(KEYS.users, SEED_USERS);
-    DB.set(KEYS.menu, SEED_MENU.map(m => ({ available: true, ...m })));   // Mặc định món mẫu đang bán.
-    DB.set(KEYS.orders, orders);
-    DB.set(KEYS.seq, Math.max(1000, ...orders.map(o => o.id)) + 1);
-    DB.set(KEYS.mine, []);
-    DB.set(KEYS.seeded, SEED_VERSION);
+
+  // Khởi động: nạp dữ liệu từ server. Trả về true nếu kết nối được.
+  static init() { return Store.sync(); }
+
+  // [API] Nạp lại toàn bộ dữ liệu cần dùng từ server. Trả về false nếu không kết nối được server.
+  // fresh = true (dùng sau khi vừa ghi dữ liệu): nếu đang có một lần sync chạy dở thì chờ nó xong rồi sync lại,
+  // vì lần chạy dở có thể đã đọc dữ liệu TRƯỚC khi thao tác ghi hoàn tất. Mặc định thì dùng chung lần đang chạy.
+  static sync(fresh = false) {
+    let p;
+    if (!Store.#syncing) p = Store.#doSync();
+    else if (!fresh) return Store.#syncing;
+    else p = Store.#syncing.then(() => Store.#doSync());
+    Store.#syncing = p;
+    p.finally(() => { if (Store.#syncing === p) Store.#syncing = null; });
+    return p;
   }
 
-  // Xoá toàn bộ dữ liệu (dùng cho Admin).
+  static async #doSync() {
+    try {
+      // Dữ liệu công khai: thực đơn + mã đơn kế tiếp
+      const [menu, next] = await Promise.all([api("/menu"), api("/orders/next-id")]);
+      const raw = JSON.stringify(menu);
+      Store.menuChanged = raw !== Store.#rawMenu;
+      if (Store.menuChanged) { Store.#rawMenu = raw; Store.loadMenu(menu); }
+      Store.#nextId = next.id;
+
+      // Đơn khách đã đặt / tra cứu trên thiết bị này (server kiểm tra mã đơn + số điện thoại)
+      const refs = DB.get(KEYS.mine).filter(r => r && typeof r === "object");
+      Store.#mine = refs.length ? (await api("/orders/mine", { method: "POST", body: { orders: refs } })).orders : [];
+
+      // Dữ liệu riêng của nhân viên / Admin
+      const s = Store.session();
+      if (s && s.role !== "Customer" && Store.#sessionOk) {
+        try {
+          Store.#orders = (await api("/orders")).orders;
+          if (s.role === "Admin") {
+            Store.#users = (await api("/users")).users;
+            Store.#stats = await api(`/stats?day=${isoDate(new Date())}`);
+          }
+        } catch (e) {
+          if (e.status !== 401) throw e;   // 401 đã được api() ghi nhận vào sessionOk
+        }
+      }
+      return true;
+    } catch {
+      return false;   // không kết nối được server: giữ nguyên cache cũ
+    }
+  }
+
+  // [API] Server báo phiên không còn hợp lệ → sessionValid() sẽ trả false ở lần vẽ lại kế tiếp.
+  static markSessionExpired() { Store.#sessionOk = false; }
+
+  // Xoá dữ liệu riêng của nhân viên khỏi bộ nhớ (khi đăng xuất).
+  static clearPrivate() {
+    Store.#orders = []; Store.#users = [];
+    Store.#stats = { count: 0, revenue: 0, expected: 0, dishes: [] };
+    Store.#sessionOk = true;
+  }
+
+  // Xoá dữ liệu lưu trên thiết bị này (đơn đã nhớ + phiên). Dữ liệu thật nằm trong MySQL nên không bị xoá.
   static reset() {
     Object.values(KEYS).forEach(k => DB.remove(k));
     DB.setSession(null);
-    Store.seed();
+    Store.clearPrivate();
   }
 
-  // Tài khoản mẫu, nạp vào localStorage; tài khoản mới không ghi lại file.
 
-  static users() { return DB.get(KEYS.users); }
+  // Danh sách tài khoản (chỉ Admin tải được).
+  static users() { return Store.#users; }
 
-  // Trả về user hoặc thông báo lỗi.
-  static login(username, password) {
-    const u = Store.users().find(x => x.username.toLowerCase() === String(username).trim().toLowerCase());
-    if (!u || u.password !== password) return { error: "Incorrect username or password." };
-    if (u.status !== "Active") return { error: "This account is locked. Please contact an administrator." };
-    return { user: u };
+  // [API] Gửi tên đăng nhập + mật khẩu lên server. Trả về { user } (kèm token) hoặc { error }.
+  static async login(username, password) {
+    try {
+      const { user } = await api("/login", { method: "POST", body: { username, password } });
+      return { user };
+    } catch (e) {
+      return { error: e.message };
+    }
   }
 
 
@@ -94,140 +189,113 @@ class Store {
 
 
   static session() { return DB.getSession(); }
-  static startSession(role, username = "") { DB.setSession({ role, username }); }
-  static endSession() { DB.setSession(null); }
+  // [API] token do server cấp khi đăng nhập, được gửi kèm mỗi lần gọi API của nhân viên.
+  static startSession(role, username = "", token = "") { Store.#sessionOk = true; DB.setSession({ role, username, token }); }
+  static endSession() { DB.setSession(null); Store.clearPrivate(); }
 
 
   // Kiểm tra tài khoản Staff/Admin còn hoạt động và đúng vai trò.
+  // [API] Việc kiểm tra do server làm (mỗi request đều kiểm tra lại trong database), ở đây chỉ đọc kết quả.
   static sessionValid() {
     const s = Store.session();
     if (!s) return false;
     if (s.role === "Customer") return true;
-    const u = Store.users().find(x => x.username === s.username);
-    return !!u && u.status === "Active" && u.role === s.role;
+    return Store.#sessionOk;
   }
 
-  // Trả thông báo lỗi hoặc chuỗi rỗng NẾU THÀNH CÔNG
-  static addUser(username, password) {
-    const users = Store.users(), name = username.trim();
-    if (users.some(u => u.username.toLowerCase() === name.toLowerCase())) return "That username already exists.";
-    users.push({ user_id: Math.max(0, ...users.map(u => u.user_id)) + 1, username: name, password, role: "Staff", status: "Active" });
-    DB.set(KEYS.users, users);
-    return "";
+  // Ném lỗi (ApiError) nếu thất bại, thành công thì tự nạp lại dữ liệu.
+  static async addUser(username, password) {
+    await api("/users", { method: "POST", body: { username, password } });
+    await Store.sync(true);
   }
 
 
-  static updateUser(userId, patch) {
-    const users = Store.users(), u = users.find(x => x.user_id === userId);
-    if (!u) return;
-    Object.assign(u, patch);
-    DB.set(KEYS.users, users);
+  static async updateUser(userId, patch) {
+    await api(`/users/${userId}`, { method: "PATCH", body: patch });
+    await Store.sync(true);
   }
 
 
   // THỰC ĐƠN
-  static loadMenu() {
-    MENU = DB.get(KEYS.menu).map(raw => new MenuItem(raw));
+  // [API] data = danh sách món lấy từ server; không truyền thì dựng lại từ lần tải gần nhất.
+  static loadMenu(data = JSON.parse(Store.#rawMenu || "[]")) {
+    MENU = data.map(raw => new MenuItem(raw));
     CATEGORIES = [...new Set(MENU.filter(m => m.available).map(m => m.category))];
   }
 
   static allCategories() { return [...new Set(MENU.map(m => m.category))]; }
   static isAvailable(id) { const m = MENU.find(x => x.id === id); return !!m && m.available; }
 
-  // Thêm món mới hoặc cập nhật món hiện có.
-  static saveMenuItem(data) {
-    const list = DB.get(KEYS.menu);
-    if (data.id) list.splice(list.findIndex(m => m.id === data.id), 1, data);
-    else list.push({ ...data, id: Math.max(0, ...list.map(m => m.id)) + 1 });
-    DB.set(KEYS.menu, list);
-    Store.loadMenu();
+  // Thêm món mới hoặc cập nhật món hiện có. Ném lỗi (ApiError) nếu server từ chối.
+  static async saveMenuItem(data) {
+    await api("/menu", { method: "POST", body: data });
+    await Store.sync(true);
   }
   // Ẩn món để giữ tham chiếu trong đơn cũ.
-  static toggleAvailable(id) {
-    const list = DB.get(KEYS.menu), m = list.find(x => x.id === id);
-    if (!m) return;
-    m.available = m.available === false;   // Đảo trạng thái kinh doanh.
-    DB.set(KEYS.menu, list);
-    Store.loadMenu();
+  static async toggleAvailable(id) {
+    await api(`/menu/${id}/toggle`, { method: "POST" });
+    await Store.sync(true);
   }
 
   // Đơn hàng
-  static orders() { return DB.get(KEYS.orders).map(o => Order.fromJSON(o)); }
-  static nextOrderId() { return DB.get(KEYS.seq, 1001); }
+  static orders() { return Store.#orders.map(o => Order.fromJSON(o)); }
+  static nextOrderId() { return Store.#nextId; }
 
-  static addOrder(order) {
-    const list = DB.get(KEYS.orders);
-    list.unshift(order);
-    DB.set(KEYS.orders, list);
-    DB.set(KEYS.seq, order.id + 1);
+  // [API] payload = { info, lines } theo OrderRepository.create. Giá và tên món do server lấy từ database.
+  // Trả về { id, subtotal, tax, total }; ném lỗi (ApiError) nếu server từ chối.
+  static async addOrder(payload) {
+    const result = await api("/orders", { method: "POST", body: payload });
+    await Store.sync(true);
+    return result;
   }
 
   // Đổi trạng thái nếu bước tiếp theo hợp lệ.
-  static setStatus(id, status, reason = "") {
-    const list = DB.get(KEYS.orders), raw = list.find(o => o.id === id);
-    if (!raw || !Order.fromJSON(raw).nextSteps.some(([s]) => s === status)) return false;
-    raw.status = status;
-    if (status === "Rejected") raw.rejectReason = reason;   // Lưu lý do từ chối.
-    if (status === "Completed" && raw.payment === "cash") raw.paid = true;   // Thu tiền mặt khi hoàn tất.
-    DB.set(KEYS.orders, list);
-    return true;
+  // [API] Trả về true nếu được, false nếu đơn vừa bị người khác đổi (giữ nguyên cách dùng cũ).
+  static async setStatus(id, status, reason = "") {
+    try {
+      await api(`/orders/${id}/status`, { method: "POST", body: { status, reason } });
+      await Store.sync(true);
+      return true;
+    } catch (e) {
+      await Store.sync(true);
+      if (e.status === 400 && !/reason/i.test(e.message)) return false;
+      throw e;
+    }
   }
 
 
 
-  static markPaid(id) {
-    const list = DB.get(KEYS.orders), raw = list.find(o => o.id === id);
-    if (!raw) return;
-    raw.paid = true;
-    DB.set(KEYS.orders, list);
+  static async markPaid(id) {
+    await api(`/orders/${id}/paid`, { method: "POST" });
+    await Store.sync(true);
   }
   // Dùng phát hiện thay đổi dữ liệu đơn.
-  static ordersSignature() { return JSON.stringify(DB.get(KEYS.orders)); }
+  // [API] Nhân viên: theo tất cả đơn. Khách: theo các đơn của mình.
+  static ordersSignature() {
+    const s = Store.session();
+    return JSON.stringify(s && s.role !== "Customer" ? Store.#orders : Store.#mine);
+  }
 
   // Lịch sử đơn khách
 
-  static rememberOrder(id) {
-    const ids = DB.get(KEYS.mine);
-    if (!ids.includes(id)) DB.set(KEYS.mine, [...ids, id]);
+  // [API] Nhớ cả số điện thoại để server xác nhận đúng chủ đơn khi tải lại.
+  static rememberOrder(id, phone) {
+    const refs = DB.get(KEYS.mine).filter(r => r && typeof r === "object");
+    if (!refs.some(r => r.id === id)) DB.set(KEYS.mine, [...refs, { id, phone }]);
   }
-  static myOrders() {
-    const ids = new Set(DB.get(KEYS.mine));
-    return Store.orders().filter(o => ids.has(o.id));
-  }
+  static myOrders() { return Store.#mine.map(o => Order.fromJSON(o)); }
 
 
 
   // Tra cứu theo mã đơn và số điện thoại.
-  static findOrder(code, phone) {
-    const digits = s => String(s).replace(/\D/g, ""), id = Number(digits(code));
-    return Store.orders().find(o => o.id === id && digits(o.phone) === digits(phone) && digits(phone) !== "") || null;
+  // [API] Do server tra cứu. Trả về Order, hoặc null nếu không thấy.
+  static async findOrder(code, phone) {
+    const { order } = await api("/orders/lookup", { method: "POST", body: { code, phone } });
+    return order ? Order.fromJSON(order) : null;
   }
 
 
   // Thống kê đơn trong ngày của admin, không tính đơn bị từ chối.
-  static stats(day = isoDate(new Date())) {
-
-    const today = Store.orders().filter(o => isoDate(new Date(o.createdAt)) === day && o.status !== "Rejected");
-    const dishes = new Map();
-    today.forEach(o => o.lines.forEach(l => {
-      const key = `${l.name}|${l.size}`,
-        cur = dishes.get(key) || {
-          name: l.name,
-          size: l.size,
-          qty: 0
-        };
-
-      cur.qty += l.qty;
-      dishes.set(key, cur);
-    }
-    )
-    );
-
-    return {
-      count: today.length,
-      revenue: today.filter(o => o.paid).reduce((s, o) => s + o.total, 0),
-      expected: today.reduce((s, o) => s + o.total, 0),
-      dishes: [...dishes.values()].sort((a, b) => b.qty - a.qty),
-    };
-  }
+  // [API] Do server tính bằng 2 view trong MySQL (v_daily_revenue, v_daily_dish_stats), chỉ có số liệu của hôm nay.
+  static stats() { return Store.#stats; }
 }
