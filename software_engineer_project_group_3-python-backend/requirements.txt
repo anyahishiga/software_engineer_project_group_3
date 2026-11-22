@@ -1,5 +1,0 @@
-# Thư viện Python của backend (Docker cài từ file này)
-Flask>=3.0            # [API] server web: backend/app.py
-gunicorn>=22.0        # [API] chạy Flask trong Docker (thay cho server dev của Flask)
-mysql-connector-python>=9.0
-bcrypt>=4.0

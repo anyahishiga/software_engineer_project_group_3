@@ -1,9 +1,0 @@
-.venv/
-.git/
-__pycache__/
-*.pyc
-.env
-css/
-function/
-images/
-sql/
