@@ -1,0 +1,52 @@
+services:
+  # [API] Cơ sở dữ liệu MySQL. Lần chạy đầu tự nạp sql/restaurant_db_mysql.sql (tạo bảng, thực đơn mẫu, user restaurant_app).
+  db:
+    image: mysql:8.4
+    container_name: restaurant-db-group3
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-time-zone=+07:00
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ../sql/restaurant_db_mysql.sql:/docker-entrypoint-initdb.d/01-restaurant_db.sql:ro
+    ports:
+      - "127.0.0.1:3307:3306"   # tùy chọn: mở MySQL Workbench / DBeaver vào localhost:3307 (chỉ máy bạn truy cập được)
+    healthcheck:
+      # -h 127.0.0.1: chỉ báo "sẵn sàng" khi MySQL thật đã chạy xong bước nạp file .sql
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
+  # [API] Server Python (Flask): nhận /api/... từ giao diện và đọc / ghi MySQL qua repositories.py
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: restaurant-backend-group3
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_NAME: restaurant_db
+      DB_USER: restaurant_app
+      DB_PASSWORD: ${DB_PASSWORD:-Restaurant@123}   # phải khớp mật khẩu của restaurant_app trong file .sql
+      SECRET_KEY: ${SECRET_KEY:-dev-only-change-me}  # khoá ký token đăng nhập — đổi khi deploy thật
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: restaurant-order-group3
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend   # [API] nginx cần tìm thấy "backend" để chuyển tiếp /api/
+    restart: unless-stopped
+
+volumes:
+  db_data:
