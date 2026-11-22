@@ -1,9 +1,0 @@
-services:
-  web:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
-    container_name: restaurant-order-group3
-    ports:
-      - "8080:80"
-    restart: unless-stopped
