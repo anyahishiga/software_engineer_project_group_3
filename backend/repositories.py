@@ -1,8 +1,3 @@
-"""Lớp truy cập dữ liệu (Repository) — thay cho backend/server.js và function/Storage.js.
-
-Mỗi class phụ trách một nhóm dữ liệu. Lỗi nghiệp vụ được ném ra bằng RepositoryError
-với thông báo giống ứng dụng cũ, giao diện chỉ cần hiển thị str(lỗi).
-"""
 import re
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
@@ -19,7 +14,7 @@ REQUIRED_MSG = "Please fill in the required fields"
 
 
 class RepositoryError(Exception):
-    """Lỗi nghiệp vụ (dữ liệu sai, thao tác không hợp lệ). str(e) là thông báo cho người dùng."""
+    pass
 
 
 def _digits(text):
@@ -27,7 +22,6 @@ def _digits(text):
 
 
 def next_steps(status, mode):
-    """Các bước nhân viên được bấm tiếp theo: [(trạng thái mới, chữ trên nút), ...]."""
     flow = {
         "Pending": [("Confirmed", "Confirm"), ("Rejected", "Reject")],
         "Confirmed": [("Cooking", "Start cooking")],
@@ -39,7 +33,6 @@ def next_steps(status, mode):
 
 
 def validate_schedule(day, time_str):
-    """Kiểm tra lịch nhận hàng. Trả về chuỗi lỗi, hoặc "" nếu hợp lệ."""
     is_today = day == date.today()
     if time_str == "ASAP":
         return "" if is_today else "ASAP only applies to today — please choose a specific time."
@@ -56,7 +49,6 @@ def validate_schedule(day, time_str):
 
 
 def parse_size_lines(text):
-    """Đọc ô 'Sizes & prices': mỗi dòng 'Tên | Giá' → [{'label':..., 'price': Decimal}, ...]."""
     sizes = []
     for row in (r for r in text.split("\n") if r.strip()):
         label, _, price = (x.strip() for x in row.partition("|"))
@@ -72,13 +64,9 @@ def parse_size_lines(text):
     return sizes
 
 
-# --------------------------------------------------------------------------
-# Tài khoản
-# --------------------------------------------------------------------------
 class UserRepository:
     @staticmethod
     def login(username, password):
-        """Trả về {'user': {...}} hoặc {'error': '...'}."""
         u = query("SELECT * FROM users WHERE LOWER(username) = LOWER(%s)", (str(username).strip(),), one=True)
         try:
             ok = bool(u) and bcrypt.checkpw(str(password).encode(), u["password_hash"].encode())
@@ -96,13 +84,11 @@ class UserRepository:
 
     @staticmethod
     def is_session_valid(username, role):
-        """Tài khoản còn hoạt động và đúng vai trò (dùng khi Admin khoá tài khoản đang đăng nhập)."""
         u = query("SELECT role, status FROM users WHERE username = %s", (username,), one=True)
         return bool(u) and u["status"] == "Active" and u["role"] == role
 
     @staticmethod
     def add(username, password):
-        """Tạo tài khoản Staff mới."""
         username = username.strip()
         if not USERNAME_PATTERN.match(username):
             raise RepositoryError("Username: at least 3 characters, no spaces or accents.")
@@ -115,7 +101,6 @@ class UserRepository:
 
     @staticmethod
     def update(user_id, password=None, status=None):
-        """Đổi mật khẩu (bỏ trống = giữ nguyên) và/hoặc khoá / mở khoá."""
         if password:
             if len(password) < 4:
                 raise RepositoryError("Password must be at least 4 characters.")
@@ -127,13 +112,9 @@ class UserRepository:
             execute("UPDATE users SET status = %s WHERE user_id = %s", (status, user_id))
 
 
-# --------------------------------------------------------------------------
-# Thực đơn
-# --------------------------------------------------------------------------
 class MenuRepository:
     @staticmethod
     def list_all():
-        """Tất cả món (kể cả món ngừng bán) kèm danh sách size."""
         items = query("""SELECT mi.id, mi.name, mi.description, mi.image_url, mi.available, c.name AS category
                          FROM menu_items mi JOIN categories c ON c.id = mi.category_id ORDER BY mi.id""")
         sizes = query("SELECT item_id, label, price FROM menu_item_sizes ORDER BY item_id, sort_order, id")
@@ -149,16 +130,20 @@ class MenuRepository:
 
     @staticmethod
     def save(data):
-        """Thêm món (không có 'id') hoặc cập nhật món (có 'id').
-        data: name, category, desc, img, sizes=[{'label','price'}], available, id(tuỳ chọn)."""
         name = str(data.get("name", "")).strip()
         category = str(data.get("category", "")).strip()
         sizes = data.get("sizes") or []
         if not name or not category:
             raise RepositoryError("Please enter a name and a category.")
-        if not sizes:
+        if not isinstance(sizes, list) or not sizes:
             raise RepositoryError("At least one size with a price is required.")
-        labels = [s["label"].strip().lower() for s in sizes]
+        try:
+            sizes = [{"label": str(s["label"]).strip(), "price": Decimal(str(s["price"]))} for s in sizes]
+        except (TypeError, KeyError, InvalidOperation):
+            raise RepositoryError("Each size needs a name and a valid price.")
+        if any(not s["label"] or not s["price"].is_finite() or s["price"] < 0 for s in sizes):
+            raise RepositoryError("Each size needs a name and a valid price.")
+        labels = [s["label"].lower() for s in sizes]
         if len(set(labels)) != len(labels):
             raise RepositoryError("Size names must be different.")
         item_id = data.get("id")
@@ -181,18 +166,14 @@ class MenuRepository:
             cur.execute("DELETE FROM menu_item_sizes WHERE item_id = %s", (item_id,))
             for i, s in enumerate(sizes):
                 cur.execute("INSERT INTO menu_item_sizes (item_id, label, price, sort_order) VALUES (%s,%s,%s,%s)",
-                            (item_id, s["label"].strip(), s["price"], i))
+                            (item_id, s["label"], s["price"], i))
         return item_id
 
     @staticmethod
     def toggle_available(item_id):
-        """Ẩn / hiện món (không xoá để đơn cũ vẫn tham chiếu được)."""
         execute("UPDATE menu_items SET available = 1 - available WHERE id = %s", (item_id,))
 
 
-# --------------------------------------------------------------------------
-# Đơn hàng
-# --------------------------------------------------------------------------
 class OrderRepository:
     @staticmethod
     def next_id():
@@ -200,21 +181,20 @@ class OrderRepository:
 
     @staticmethod
     def create(info, lines):
-        """Tạo đơn.
-        info : name, email, phone, address, mode ('pickup'|'delivery'), date (date hoặc 'YYYY-MM-DD'),
-               time ('ASAP' hoặc 'HH:MM'), payment ('bank'|'cash')
-        lines: [{'item_id', 'size' ('' nếu món chỉ có 1 size), 'qty', 'note'}]
-        Giá và tên món luôn lấy từ database, không tin dữ liệu từ giao diện."""
-        if not lines:
+        if not isinstance(lines, list) or not lines:
             raise RepositoryError("Your cart is empty")
+        if not isinstance(info, dict):
+            raise RepositoryError(REQUIRED_MSG)
         name, email = str(info.get("name", "")).strip(), str(info.get("email", "")).strip()
         phone, address = str(info.get("phone", "")).strip(), str(info.get("address", "")).strip()
         mode, payment, time_str = info.get("mode"), info.get("payment"), str(info.get("time", ""))
         if (not name or not address or not EMAIL_PATTERN.match(email) or not PHONE_PATTERN.match(phone)
                 or mode not in ("pickup", "delivery") or payment not in ("bank", "cash")):
             raise RepositoryError(REQUIRED_MSG)
-        day = info.get("date")
-        day = date.fromisoformat(day) if isinstance(day, str) else day
+        try:
+            day = date.fromisoformat(str(info.get("date", "")))
+        except ValueError:
+            raise RepositoryError("Invalid date.")
         error = validate_schedule(day, time_str)
         if error:
             raise RepositoryError(error)
@@ -222,7 +202,13 @@ class OrderRepository:
         with transaction() as cur:
             prepared, subtotal = [], Decimal(0)
             for l in lines:
-                qty, size = int(l.get("qty", 0)), str(l.get("size", ""))
+                if not isinstance(l, dict):
+                    raise RepositoryError("Invalid order line.")
+                try:
+                    qty = int(l.get("qty", 0))
+                except (TypeError, ValueError):
+                    raise RepositoryError("Quantity must be at least 1.")
+                size = str(l.get("size", ""))
                 if qty <= 0:
                     raise RepositoryError("Quantity must be at least 1.")
                 cur.execute("""SELECT mi.id, mi.name, mi.image_url, mi.available, s.price
@@ -240,12 +226,11 @@ class OrderRepository:
             tax = (subtotal * TAX_RATE).quantize(Decimal("0.01"))
             total = subtotal + tax
 
-            cur.execute("SELECT IFNULL(MAX(id), 1000) + 1 AS id FROM orders FOR UPDATE")
-            order_id = int(cur.fetchone()["id"])
-            cur.execute("""INSERT INTO orders (id, customer_name, email, phone, address, mode, sched_date, sched_time,
+            cur.execute("""INSERT INTO orders (customer_name, email, phone, address, mode, sched_date, sched_time,
                                subtotal, tax, total, payment)
-                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-                        (order_id, name, email, phone, address, mode, day, time_str, subtotal, tax, total, payment))
+                           VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                        (name, email, phone, address, mode, day, time_str, subtotal, tax, total, payment))
+            order_id = cur.lastrowid
             for p in prepared:
                 cur.execute("""INSERT INTO order_items (order_id, item_id, item_name, image_url, size_label, qty, unit_price, note)
                                VALUES (%s,%s,%s,%s,%s,%s,%s,%s)""", (order_id,) + p)
@@ -284,7 +269,6 @@ class OrderRepository:
 
     @staticmethod
     def find(code, phone):
-        """Tra cứu theo mã đơn ('1001' hoặc 'RP1001') và số điện thoại. Không thấy → None."""
         digits, phone_digits = _digits(code), _digits(phone)
         if not digits or not phone_digits:
             return None
@@ -293,7 +277,6 @@ class OrderRepository:
 
     @staticmethod
     def set_status(order_id, status, reason=""):
-        """Đổi trạng thái nếu bước tiếp theo hợp lệ; ném RepositoryError nếu không."""
         reason = (reason or "").strip()
         if status == "Rejected" and len(reason) < 3:
             raise RepositoryError("Please enter a reason.")
@@ -316,20 +299,16 @@ class OrderRepository:
         execute("UPDATE orders SET paid = 1 WHERE id = %s", (order_id,))
 
 
-# --------------------------------------------------------------------------
-# Thống kê (dùng 2 view trong database)
-# --------------------------------------------------------------------------
 class StatsRepository:
     @staticmethod
     def daily(day=None):
-        """Thống kê một ngày (mặc định hôm nay), không tính đơn bị từ chối."""
         day = day or date.today()
         r = query("SELECT num_orders, revenue, expected FROM v_daily_revenue WHERE `day` = %s", (day,), one=True)
         dishes = query("""SELECT item_name AS name, size_label AS size, qty_sold AS qty
                           FROM v_daily_dish_stats WHERE `day` = %s ORDER BY qty_sold DESC""", (day,))
         return {
             "count": int(r["num_orders"]) if r else 0,
-            "revenue": float(r["revenue"]) if r else 0.0,    # chỉ đơn đã thu tiền
-            "expected": float(r["expected"]) if r else 0.0,  # gồm cả đơn chưa thu
+            "revenue": float(r["revenue"]) if r else 0.0,
+            "expected": float(r["expected"]) if r else 0.0,
             "dishes": [{"name": d["name"], "size": d["size"], "qty": int(d["qty"])} for d in dishes],
         }
