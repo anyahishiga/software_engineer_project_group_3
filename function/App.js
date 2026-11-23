@@ -1,3 +1,22 @@
+//  các hàm chính của ứng dụng:
+
+
+
+// điều hướng: navigate(name) → refresh() → this.views[name].mount()
+// đồng bộ giữa các tab: onStorage() → tick() → Store.sync() → refresh()
+// tạo đơn: placeOrder() → Store.addOrder() → Store.rememberOrder() → Store.sync()
+// thông báo: toast(msg)z
+// quantrị phiên đăng nhập: login() → Store.startSession() → Store.sync() → navigate()
+// phân quyền: allowed(name) → guard() → refresh()
+
+
+
+
+
+
+
+
+
 "use strict";
 
 
@@ -14,10 +33,11 @@ const CUSTOMER_VIEWS = ["home", "order", "cart", "checkout", "dashboard"];   // 
 
 
 
-// đúng 1 class Ứng dụng chính
 class App {
+
   constructor() {
-    // [API] Dữ liệu giờ lấy từ server (MySQL), nên việc nạp dữ liệu chuyển sang start() bên dưới (bất đồng bộ).
+
+
     this.ready = false;  // true sau khi nạp xong dữ liệu lần đầu
     this.online = true;  // false khi mất kết nối server (để chỉ báo lỗi 1 lần)
 
@@ -28,7 +48,7 @@ class App {
     this.cart = new Cart(); this.schedule = new PickupSchedule(); this.current = "home";''
     
 
-
+    // Các view của ứng dụng (khách, nhân viên, quản trị) — mỗi view là 1 class riêng
     this.views = {
       home: new HomeView(this), order: new OrderView(this), cart: new CartView(this), checkout: new CheckoutView(this), dashboard: new DashboardView(this),
       staff: new StaffView(this), admin: new AdminView(this),
@@ -65,7 +85,6 @@ class App {
 
 
   /* --- phiên đăng nhập, phân quyền --- */
-
   get session() { return Store.session(); }
 
   homeView() {
@@ -82,6 +101,7 @@ class App {
    // Xử lý sau khi đăng nhập thành công
   // [API] user.token do server cấp; sync() để tải ngay danh sách đơn / tài khoản của nhân viên trước khi vẽ trang.
   async login(user) {
+
     Store.startSession(user.role, user.username, user.token);
     await Store.sync(true);
     this.toast(`Welcome, ${user.username}`); this.navigate(this.homeView());
@@ -140,7 +160,7 @@ class App {
     this.online = connected;
     if (!this.allowed(this.current)) return this.refresh();   // vd. tài khoản vừa bị Admin khóa
     if (Store.menuChanged && ["home", "order"].includes(this.current)) return this.refresh();   // thực đơn vừa đổi
-    this.views[this.current].onTick();
+    this.views[this.current].onTick();  // cho phép view tự cập nhật theo chu kỳ (vd. đồng hồ PickupSchedule)
   }
 
 
@@ -173,6 +193,10 @@ class App {
     if (this._placing) return;   // đang gửi đơn → bỏ qua lần bấm thứ hai (tránh tạo 2 đơn)
     this._placing = true;
     let result;
+
+
+
+
     try {
       result = await Store.addOrder({
         info: { ...info, mode: this.schedule.mode, date: isoDate(this.schedule.date), time: this.schedule.time, payment },
@@ -183,9 +207,16 @@ class App {
     } finally {
       this._placing = false;
     }
+
+
+
+
+
     const id = result.id;
     Store.rememberOrder(id, info.phone);
-    await Store.sync(true);             // tải lại để đơn mới hiện ngay ở "My orders"
+    
+    // tải lại để đơn mới hiện ngay ở "My orders"
+    await Store.sync(true);            
     this.cart.clear();
     // Có người khác đặt đơn trong lúc khách quét QR → mã đơn thật khác mã trên QR, nhắc khách ghi đúng nội dung chuyển khoản
     this.toast(payment === "bank" && id !== expectedId
