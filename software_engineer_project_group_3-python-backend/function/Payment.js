@@ -1,18 +1,12 @@
 "use strict";
 
-/* =====================================================================
-   CẤU HÌNH THANH TOÁN (Việt Nam)
-   ===================================================================== */
-
 // 1) Thông tin tài khoản nhận tiền của quán  
 const SHOP_BANK = {
   // Mã ngân hàng: mã BIN 6 số hoặc tên viết tắt theo NAPAS 
-  // Ví dụ BIN: Vietcombank 970436 · MB 970422 · Techcombank 970407 · ACB 970416
-  //            BIDV 970418 · VietinBank 970415 · VPBank 970432 · TPBank 970423
   bankId: "970422",
   bankName: "MB Bank",
   accountNo: "0123456789",
-  accountName: "ALAHU AKBAR",   // viết hoa, không dấu cho giống tên trên tài khoản
+  accountName: "ALAHU AKBAR", 
   template: "compact2",          // compact2 = QR + thông tin; compact = QR + logo; qr_only = chỉ QR
   prefix: "RP"                   // tiền tố nội dung chuyển khoản → RP1001, RP1002...
 };
