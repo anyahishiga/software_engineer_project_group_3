@@ -1,8 +1,13 @@
+// các hàm tiện ích dùng chung cho các phần khác (Models, Views, Store, App, Modals).
+
+
 "use strict";
 
 
 
-// Các hàm tiện ích dùng chung cho các phần khác (Models, Views, Store, App, Modals).
+
+
+// hàm định dạng tiền tệ Việt Nam (đơn vị: đồng) với dấu phân cách hàng nghìn và ký hiệu ₫
 const money = n => Math.round(n).toLocaleString("en-US") + " ₫";
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const pad = n => String(n).padStart(2, "0");
