@@ -1,3 +1,21 @@
+// các chức chính của ứng dụng:
+
+//gọi server:       api,method, fetch với GET / POST / PATCH
+
+
+// nạp dữ liệu:      Store.sync() → Store.#doSync() → api("/menu"), api("/orders"), api("/users"), api("/stats")
+
+// thao tác ghi:     Store.addOrder() / setStatus() / markPaid() / saveMenuItem() / addUser() → api() → Store.sync(true)
+//method
+
+// đăng nhập:        Store.login() → api("/login") → Store.startSession()
+
+
+// lưu  trình duyệt:
+
+
+
+
 "use strict";
 
 // Chu kỳ tự làm mới dữ liệu: 5000 ms = 5 giây.
@@ -5,14 +23,12 @@
 const POLL_MS = 5000;
 
 // [API] Địa chỉ gốc của server. Chạy bằng Docker: nginx chuyển tiếp "/api/" sang server Python (xem docker/nginx.conf).
-// Chạy "python -m backend.app" thì server Python cũng phục vụ luôn giao diện nên giữ nguyên "/api".
 const API_BASE = "/api";
 
 
 
 // [API] Dữ liệu (tài khoản, thực đơn, đơn hàng) giờ nằm trong MySQL. Trình duyệt chỉ còn lưu 2 thứ:
-//   session: phiên đăng nhập (sessionStorage, mất khi đóng tab)
-//   mine   : mã đơn + số điện thoại của các đơn khách đã đặt trên thiết bị này (localStorage)
+
 const KEYS = {
   mine: "rp_my_orders", session: "rp_session",
 };
@@ -61,6 +77,9 @@ class ApiError extends Error {
   constructor(message, status = 0) { super(message); this.status = status; }
 }
 
+
+
+
 // [API] Gọi server và trả về dữ liệu JSON. Nhân viên / Admin đã đăng nhập thì tự gửi kèm token.
 async function api(path, { method = "GET", body } = {}) {
   const headers = { "Content-Type": "application/json" };
@@ -89,7 +108,7 @@ async function api(path, { method = "GET", body } = {}) {
 
 // [API] Store giữ nguyên các hàm cũ để Views / Modals / App ít phải sửa.
 //   - Hàm ĐỌC (orders, users, myOrders, stats...) vẫn chạy ngay, lấy từ bộ nhớ tạm (cache) trong trang.
-//   - Cache được nạp từ server bởi Store.sync() — gọi lúc khởi động, sau mỗi thao tác ghi và mỗi POLL_MS.
+//   - Cache được nạp từ server bởi Store.sync() — gọi lúc khởi động, sau mỗi thao tác ghi 
 //   - Hàm GHI (login, addOrder, setStatus...) đổi thành async, gọi server rồi nạp lại cache.
 class Store {
 
@@ -100,6 +119,7 @@ class Store {
   static #mine = [];              // đơn của khách trên thiết bị này
   static #users = [];             // danh sách tài khoản — chỉ Admin
   static #stats = { count: 0, revenue: 0, expected: 0, dishes: [] };
+
   static #sessionOk = true;       // false khi server báo token hết hạn / tài khoản bị khoá
   static #syncing = null;         // lần sync đang chạy (tránh gọi chồng nhau)
   static menuChanged = false;     // lần sync gần nhất có thấy thực đơn thay đổi không
@@ -187,15 +207,18 @@ class Store {
 
 
 
-
+/// Phiên đăng nhập hiện tại (chỉ có nhân viên / Admin mới có token). Trả về { role, username, token } hoặc null.
   static session() { return DB.getSession(); }
-  // [API] token do server cấp khi đăng nhập, được gửi kèm mỗi lần gọi API của nhân viên.
+  
+  //   Nếu token hết hạn hoặc tài khoản bị khoá thì server trả 401 → Store.markSessionExpired() → sessionValid() sẽ trả false.
   static startSession(role, username = "", token = "") { Store.#sessionOk = true; DB.setSession({ role, username, token }); }
+  // [API] Xoá phiên đăng nhập (khi đăng xuất hoặc token hết hạn). Trả về null.
   static endSession() { DB.setSession(null); Store.clearPrivate(); }
 
 
+
+
   // Kiểm tra tài khoản Staff/Admin còn hoạt động và đúng vai trò.
-  // [API] Việc kiểm tra do server làm (mỗi request đều kiểm tra lại trong database), ở đây chỉ đọc kết quả.
   static sessionValid() {
     const s = Store.session();
     if (!s) return false;
@@ -203,13 +226,13 @@ class Store {
     return Store.#sessionOk;
   }
 
+
+
   // Ném lỗi (ApiError) nếu thất bại, thành công thì tự nạp lại dữ liệu.
   static async addUser(username, password) {
     await api("/users", { method: "POST", body: { username, password } });
     await Store.sync(true);
   }
-
-
   static async updateUser(userId, patch) {
     await api(`/users/${userId}`, { method: "PATCH", body: patch });
     await Store.sync(true);
@@ -217,11 +240,12 @@ class Store {
 
 
   // THỰC ĐƠN
-  // [API] data = danh sách món lấy từ server; không truyền thì dựng lại từ lần tải gần nhất.
   static loadMenu(data = JSON.parse(Store.#rawMenu || "[]")) {
     MENU = data.map(raw => new MenuItem(raw));
     CATEGORIES = [...new Set(MENU.filter(m => m.available).map(m => m.category))];
   }
+
+
 
   static allCategories() { return [...new Set(MENU.map(m => m.category))]; }
   static isAvailable(id) { const m = MENU.find(x => x.id === id); return !!m && m.available; }
@@ -241,7 +265,10 @@ class Store {
   static orders() { return Store.#orders.map(o => Order.fromJSON(o)); }
   static nextOrderId() { return Store.#nextId; }
 
-  // [API] payload = { info, lines } theo OrderRepository.create. Giá và tên món do server lấy từ database.
+  
+
+
+
   // Trả về { id, subtotal, tax, total }; ném lỗi (ApiError) nếu server từ chối.
   static async addOrder(payload) {
     const result = await api("/orders", { method: "POST", body: payload });
@@ -249,8 +276,11 @@ class Store {
     return result;
   }
 
+
+
+
+
   // Đổi trạng thái nếu bước tiếp theo hợp lệ.
-  // [API] Trả về true nếu được, false nếu đơn vừa bị người khác đổi (giữ nguyên cách dùng cũ).
   static async setStatus(id, status, reason = "") {
     try {
       await api(`/orders/${id}/status`, { method: "POST", body: { status, reason } });
@@ -269,16 +299,16 @@ class Store {
     await api(`/orders/${id}/paid`, { method: "POST" });
     await Store.sync(true);
   }
+
+
+
   // Dùng phát hiện thay đổi dữ liệu đơn.
-  // [API] Nhân viên: theo tất cả đơn. Khách: theo các đơn của mình.
   static ordersSignature() {
     const s = Store.session();
     return JSON.stringify(s && s.role !== "Customer" ? Store.#orders : Store.#mine);
   }
 
   // Lịch sử đơn khách
-
-  // [API] Nhớ cả số điện thoại để server xác nhận đúng chủ đơn khi tải lại.
   static rememberOrder(id, phone) {
     const refs = DB.get(KEYS.mine).filter(r => r && typeof r === "object");
     if (!refs.some(r => r.id === id)) DB.set(KEYS.mine, [...refs, { id, phone }]);
@@ -288,7 +318,6 @@ class Store {
 
 
   // Tra cứu theo mã đơn và số điện thoại.
-  // [API] Do server tra cứu. Trả về Order, hoặc null nếu không thấy.
   static async findOrder(code, phone) {
     const { order } = await api("/orders/lookup", { method: "POST", body: { code, phone } });
     return order ? Order.fromJSON(order) : null;
@@ -299,3 +328,5 @@ class Store {
   // [API] Do server tính bằng 2 view trong MySQL (v_daily_revenue, v_daily_dish_stats), chỉ có số liệu của hôm nay.
   static stats() { return Store.#stats; }
 }
+
+
