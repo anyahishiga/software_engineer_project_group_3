@@ -40,6 +40,9 @@ class StaffView extends DashView {
 
   isUrgent(o) { return o.isActive && (o.isAsap || o.dueAt - Date.now() <= URGENT_MINUTES * 60000); }
 
+
+
+
   // Ưu tiên đơn cần xong sớm nhất.
   sortedOrders() {
     const all = this.app.orders;
@@ -47,6 +50,7 @@ class StaffView extends DashView {
       ? all.filter(o => o.isActive).sort((a, b) => a.dueAt - b.dueAt)
       : all.filter(o => !o.isActive).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
+
 
   kpisHtml() {
     const all = this.app.orders, today = isoDate(new Date());
@@ -56,9 +60,15 @@ class StaffView extends DashView {
       ${kpi("", "Completed today", all.filter(o => o.status === "Completed" && isoDate(new Date(o.createdAt)) === today).length, "delivered or picked up")}</div>`;
   }
 
+
+
+  
   orderCardHtml(o) {
     const st = ORDER_STATUS[o.status], p = findPayment(o.payment);
     const steps = o.nextSteps.map(([status, label]) =>
+
+
+      //  nút "Mark as paid" chỉ hiện khi chưa thanh toán và chưa bị từ chối. Các nút trạng thái khác hiện khi còn bước tiếp theo.
       `<button class="${status === "Rejected" ? "btn-outline" : "btn-primary"}" data-status="${o.id}:${status}">${label}</button>`).join("");
     const payBtn = !o.paid && o.status !== "Rejected" ? `<button class="btn-ghost" data-paid="${o.id}">Mark as paid</button>` : "";
     const address = o.mode === "delivery" && o.address ? `<div><span class="lbl">Address</span><span>${esc(o.address)}</span></div>` : "";
@@ -80,6 +90,8 @@ class StaffView extends DashView {
       ${list.length ? `<div class="ocards">${list.map(o => this.orderCardHtml(o)).join("")}</div>` : `<div class="empty">No orders here</div>`}</section>`;
   }
 
+
+  //  các nút trạng thái và thanh toán
   bindBoard(root) {
     bindAll(root, "[data-filter]", el => { this.filter = el.dataset.filter; this.app.refresh(); });
     bindAll(root, "[data-status]", el => {
