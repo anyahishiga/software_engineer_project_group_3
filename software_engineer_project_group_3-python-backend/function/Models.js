@@ -164,7 +164,7 @@ const ORDER_FLOW = {
 
 // Một đơn hàng (Order) dùng cho Staff Dashboard, Customer Dashboard và thống kê
 // Đơn lưu giá chốt lúc đặt nên đổi giá thực đơn không ảnh hưởng đơn cũ.
-// Đơn thật do server tạo; constructor và lineFrom hiện chỉ Orders.js (file không còn dùng) gọi.
+
 class Order {
 
   constructor(id, lines, total, schedule, customer, payment, contact = {}) {
