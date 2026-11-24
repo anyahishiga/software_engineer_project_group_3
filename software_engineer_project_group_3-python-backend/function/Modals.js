@@ -1,7 +1,17 @@
+// các chức năng chính của Modals:
+//
+// khung chung:      Modal.open() → title() / body() / footer() → onOpen() ... bấm OK → onConfirm()
+// khách:            ItemModal (thêm / sửa món) · ScheduleModal (ngày giờ) · OrderItemsModal (xem món)
+// nhân viên:        LoginModal → Store.login() · RejectModal → onReason(reason)
+// admin:            MenuItemModal → Store.saveMenuItem() · UserModal → Store.addUser() / updateUser()
+
+
 "use strict";
 
 
 // DỮ LIỆU MẪU của thực đơn 
+// Lớp cha của mọi hộp thoại: open() dựng khung 1 lần, lớp con chỉ ghi đè title / body / footer / onConfirm.
+// (Dòng chú thích gốc phía trên bị dán nhầm: đây không phải dữ liệu mẫu của thực đơn.)
 class Modal {
   constructor(root) { this.root = root; this.el = null; }
   eyebrow() { return ""; } title() { return ""; } subtitle() { return ""; } body() { return ""; }
@@ -11,6 +21,7 @@ class Modal {
     this.el = document.createElement("div"); this.el.className = "overlay";
     this.el.innerHTML = `<div class="modal"><button class="x" data-act="cancel" aria-label="Close">×</button>
       ${when(this.eyebrow(), `<p class="eyebrow">${this.eyebrow()}</p>`)}<h3>${this.title()}</h3><p class="sub">${this.subtitle()}</p>${this.body()}<div class="foot">${this.footer()}</div></div>`;
+    // Chỉ 1 listener cho cả lớp phủ: bấm nền tối thì đóng, bấm phần tử có data-act thì chạy cancel / ok.
     this.el.addEventListener("click", e => {
       if (e.target === this.el) return this.close();
       const act = e.target.closest("[data-act]")?.dataset.act;
@@ -55,6 +66,7 @@ class OrderItemsModal extends Modal {
 
 
 // Hỏi lý do khi nhân viên từ chối đơn; onReason(reason) được gọi khi đã nhập hợp lệ
+// Chỉ nhập lý do (ít nhất 3 ký tự) rồi gọi onReason(reason); việc đổi trạng thái đơn do nơi gọi làm.
 class RejectModal extends Modal {
   constructor(root, orderId, onReason) { super(root); Object.assign(this, { orderId, onReason }); }
   title() { return `Reject order #${this.orderId}`; }
@@ -86,6 +98,8 @@ class ScheduleModal extends Modal {
             <p class="form-err" id="mErr"></p>`;
   }
   footer() { return `<button class="btn-ghost" data-act="cancel">Cancel</button><button class="btn-primary" data-act="ok">Update</button>`; }
+  // Đọc "dd.mm.yyyy" → new Date(y, m - 1, d) (tháng trong JavaScript tính từ 0), rồi validate.
+  // Có lỗi thì hiện ở #mErr và không đóng popup.
   onConfirm() {
     const [d, m, y] = this.el.querySelector("#mDate").value.split(".").map(Number);
     const date = new Date(y, m - 1, d), time = this.el.querySelector("#mTime").value;
@@ -100,6 +114,7 @@ class ScheduleModal extends Modal {
 
 
 
+// Dùng cho cả thêm món (cartItem = null) và sửa món đã có trong giỏ.
 class ItemModal extends Modal {
   constructor(root, menuItem, cart, cartItem = null) {
     super(root); Object.assign(this, { menuItem, cart, cartItem, qty: cartItem ? cartItem.qty : 1 });
@@ -149,6 +164,7 @@ class LoginModal extends Modal {
     this.el.addEventListener("keydown", e => { if (e.key === "Enter") this.onConfirm(); });
   }
   // [API] Đăng nhập qua server nên là hàm async.
+  // Gọi server nên là async: cờ busy chặn bấm 2 lần; nếu popup đã đóng trong lúc chờ thì không đụng giao diện nữa.
   async onConfirm() {
     if (this.busy) return;   // đang chờ server → bỏ qua lần bấm thứ hai
     this.busy = true;
@@ -183,6 +199,7 @@ class MenuItemModal extends Modal {
   }
   footer() { return `<button class="btn-ghost" data-act="cancel">Cancel</button><button class="btn-primary" data-act="ok">Save</button>`; }
   // [API] Lưu qua server nên là hàm async; server từ chối thì hiện lỗi ngay trong hộp thoại.
+  // Mỗi dòng size dạng "Tên | Giá" được tách và kiểm tra; server từ chối thì hiện lỗi ngay trong popup.
   async onConfirm() {
     const val = sel => this.el.querySelector(sel).value.trim();
     const fail = text => { this.el.querySelector("#fErr").textContent = text; };
