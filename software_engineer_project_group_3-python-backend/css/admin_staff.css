@@ -12,25 +12,25 @@ body[data-mode="welcome"] .actions, body[data-mode="staff"] .actions { display: 
 /* Màn hình chào mừng và chọn vai trò (Welcome View). */
 /* Khung chọn vai trò Khách hàng hoặc Nhân viên căn giữa trang. */
 .welcome { max-width: 640px; margin: 40px auto; padding: 36px 28px; border-radius: 0; color: #fff; background: var(--brand); text-align: center; box-shadow: 0 10px 30px rgba(138, 109, 83, 0.25); }
-.welcome h1 { margin: 6px 0 10px; font-size: 30px; }
-.welcome .eyebrow, .welcome .lead { color: rgba(255, 255, 255, 0.85); }
-.welcome .lead { margin: 0 0 24px; }
-.welcome .role-card { color: var(--ink); }
-.welcome .role-card:hover { border-color: #fff; background: #F4EFEA; }
-.sub-lead { margin: -8px 0 28px; color: var(--muted); }
-.roles { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-@media (max-width: 560px) { .roles { grid-template-columns: 1fr; } }
+.welcome h1 { margin: 6px 0 10px; font-size: 30px; } /*tiêu đề chính*/
+.welcome .eyebrow, .welcome .lead { color: rgba(255, 255, 255, 0.85); } /*chữ nhãn nhỏ và đoạn giới thiệu*/
+.welcome .lead { margin: 0 0 24px; } 
+.welcome .role-card { color: var(--ink); } /*thẻ chọn vai trò*/
+.welcome .role-card:hover { border-color: #fff; background: #F4EFEA; } /*đổi màu khi chọn */
+.sub-lead { margin: -8px 0 28px; color: var(--muted); } /*mô tả phụ*/
+.roles { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }/*chia kthuoc 2 cột*/
+@media (max-width: 560px) { .roles { grid-template-columns: 1fr; } } /*màn hình nhỏ or = , 2 thành 1 cột*/
 
 
 
 
 /* Thẻ chọn vai trò có hiệu ứng đổi màu khi di chuột. */
-.role-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 28px 16px; border: 1px solid var(--line); border-radius: 0; background: #fff; font-size: 16px; }
-.role-card:hover { border-color: var(--brand); background: #EFE8DF; }
-.role-card .ico { font-size: 40px; }
+.role-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 28px 16px; border: 1px solid var(--line); border-radius: 0; background: #fff; font-size: 16px; } /*căn lề, xếp , có viền và màu*/
+.role-card:hover { border-color: var(--brand); background: #EFE8DF; } /*đổi màu thẻ khi click*/
+.role-card .ico { font-size: 40px; } /*kich thuoc icon trong the*/
 .role-card small { color: var(--muted); font-size: 12px; }
-.link-btn { border: 0; color: var(--muted); background: none; font-size: 12px; text-decoration: underline; }
-.demo-reset { margin-top: 32px; }
+.link-btn { border: 0; color: var(--muted); background: none; font-size: 12px; text-decoration: underline; } 
+.demo-reset { margin-top: 32px; } /*tạo khoảng cách phía trên nút đặt lại dữ liệu*/
 
 
 /* Bảng điều phối đơn hàng của nhân viên (Staff Dashboard). */
@@ -42,13 +42,13 @@ body[data-mode="welcome"] .actions, body[data-mode="staff"] .actions { display: 
 
 
 /* Lưới hiển thị các thẻ đơn hàng ưu tiên. */
-.ocards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
-.ocard { padding: 14px; border: none; border-radius: 0; background: #fff; }
-.ocard.urgent { border: 2px solid var(--brand); background: #F4EFEA; }
-.ocard header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
-.ocard header strong { margin-right: 4px; font-size: 18px; }
-.ocard .meta { margin-bottom: 6px; color: var(--muted); font-size: 13px; }
-.ocard footer { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.ocards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; } /*tự chia cột lưới cho danh sách thẻ đơn*/
+.ocard { padding: 14px; border: none; border-radius: 0; background: #fff; } /*thẻ đơn mặc định*/
+.ocard.urgent { border: 2px solid var(--brand); background: #F4EFEA; } /*thẻ dơn hàng khẩn, ưu tiên*/
+.ocard header { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; } /*thẻ đơn : xếp*/
+.ocard header strong { margin-right: 4px; font-size: 18px; } /*mã,tên đơn*/
+.ocard .meta { margin-bottom: 6px; color: var(--muted); font-size: 13px; } /*dòng ttin phụ*/
+.ocard footer { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); } /*phần chân thẻ đơn xếp dọc, đường kẻ ngăn cách*/
 
 
 
