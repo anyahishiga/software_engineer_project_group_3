@@ -149,7 +149,6 @@ const ORDER_STATUS = {
 
 
 
-// Các bước nhân viên được bấm tiếp theo ở mỗi trạng thái: [[trạng thái mới, chữ trên nút], ...]
 // Sơ đồ chuyển trạng thái: ở mỗi trạng thái nhân viên chỉ bấm được các nút này (xem Order.nextSteps).
 // Mỗi mục là hàm vì riêng Ready phụ thuộc mode: delivery → Delivering, pickup → Completed.
 const ORDER_FLOW = {
@@ -182,7 +181,7 @@ class Order {
 
 
 
-  // Dựng lại một đơn từ object đọc ra từ localStorage (JSON không giữ lại getter/phương thức)
+
   // JSON không giữ getter / phương thức → tạo object từ Order.prototype rồi chép dữ liệu vào,
   // để đơn nhận từ server vẫn dùng được items, taxes, nextSteps... (Store gọi hàm này).
   static fromJSON(obj) { return Object.assign(Object.create(Order.prototype), obj); }
