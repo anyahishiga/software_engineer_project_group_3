@@ -367,7 +367,7 @@ nav .nav-btn.active { color: var(--ink); background: none; box-shadow: inset 0 -
 
 
 
-<!-- Responsive cho màn hình nhỏ. -->
+/* Responsive cho màn hình nhỏ.*/
 @media (max-width: 700px) {
   .topbar { display: flex; padding: 8px 12px; }
   .container { padding: 20px 16px 60px; }
