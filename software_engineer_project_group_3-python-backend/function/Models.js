@@ -1,7 +1,17 @@
+// các chức năng chính của Models:
+//
+// món ăn:           MenuItem (sizes, priceLabel, hasSizes)
+// giỏ hàng:         CartItem → Cart.add() / update() / remove() → #emit() → App.refresh()
+// lịch nhận hàng:   PickupSchedule.validate() ← ScheduleModal, App.placeOrder()
+// trạng thái đơn:   ORDER_STATUS (chữ + màu) · ORDER_FLOW (bước tiếp theo) → Order.nextSteps
+// đơn hàng:         server trả JSON → Store → Order.fromJSON() → StaffView / DashboardView
+
+
 "use strict";
 class MenuItem {
   // available: false = món đã ngừng bán (ẩn với khách nhưng vẫn giữ để đơn cũ tham chiếu)
   constructor({ id, name, desc, img = "", category, sizes, price, available = true }) {
+    // Món không có sizes thì tạo 1 size "Default" từ price → mọi món luôn có sizes, code phía sau không cần xét riêng.
     const normalizedSizes = Array.isArray(sizes) && sizes.length
       ? sizes
       : [{ label: "Default", price: Number(price) || 0 }];
@@ -22,9 +32,12 @@ class MenuItem {
 }
 
 // Một món trong giỏ hàng (CartItem) và giỏ hàng (Cart) dùng cho khách và 
+// Một dòng trong giỏ = món + size + số lượng + ghi chú.
+// Chỉ giữ tham chiếu tới món (không chép giá) nên giá luôn lấy từ thực đơn.
 class CartItem {
   constructor(item, sizeIndex = 0, qty = 1, note = "") {
     Object.assign(this, { item, sizeIndex, qty, note });
+    // uid tăng dần để phân biệt các dòng: cùng 1 món chọn 2 size vẫn là 2 dòng có cùng item.id (sửa / xoá theo uid).
     this.uid = CartItem.seq = (CartItem.seq || 0) + 1;
   }
   get size() { return this.item.sizes[this.sizeIndex]; }
@@ -36,10 +49,12 @@ class CartItem {
 
 
 // Giỏ hàng (Cart) dùng cho khách đặt đơn
+// Giỏ hàng dùng kiểu Observer: mỗi lần đổi sẽ gọi các hàm đã subscribe (App.refresh) nên giao diện tự vẽ lại.
 class Cart {
   
   // Thuế 10% (chưa tính trong giá món)
   static TAX_RATE = 0.1;
+  // Thuộc tính private (#): chỉ sửa được qua add / update / remove, để lần nào đổi cũng có #emit().
   #items = []; #listeners = [];
   subscribe(fn) { this.#listeners.push(fn); }
   #emit() { this.#listeners.forEach(fn => fn(this)); }
@@ -88,6 +103,8 @@ class PickupSchedule {
 
 
   // Kiểm tra lịch nhận hàng: trả về chuỗi lỗi, hoặc "" nếu hợp lệ
+  // Trả về chuỗi lỗi, hợp lệ thì trả "". Luật: ASAP chỉ dùng cho hôm nay; hôm nay thì giờ chọn phải sau giờ hiện tại.
+  // Gọi ở ScheduleModal (lúc chọn) và App.placeOrder (kiểm tra lại lúc đặt).
   static validate(date, time) {
     const isToday = isoDate(date) === isoDate(new Date());
     if (time === "ASAP") return isToday ? "" : "ASAP only applies to today — please choose a specific time.";
@@ -133,6 +150,8 @@ const ORDER_STATUS = {
 
 
 // Các bước nhân viên được bấm tiếp theo ở mỗi trạng thái: [[trạng thái mới, chữ trên nút], ...]
+// Sơ đồ chuyển trạng thái: ở mỗi trạng thái nhân viên chỉ bấm được các nút này (xem Order.nextSteps).
+// Mỗi mục là hàm vì riêng Ready phụ thuộc mode: delivery → Delivering, pickup → Completed.
 const ORDER_FLOW = {
   Pending:    () => [["Confirmed", "Confirm"], ["Rejected", "Reject"]],
   Confirmed:  () => [["Cooking", "Start cooking"]],
@@ -144,6 +163,8 @@ const ORDER_FLOW = {
 
 
 // Một đơn hàng (Order) dùng cho Staff Dashboard, Customer Dashboard và thống kê
+// Đơn lưu giá chốt lúc đặt nên đổi giá thực đơn không ảnh hưởng đơn cũ.
+// Đơn thật do server tạo; constructor và lineFrom hiện chỉ Orders.js (file không còn dùng) gọi.
 class Order {
 
   constructor(id, lines, total, schedule, customer, payment, contact = {}) {
@@ -162,6 +183,8 @@ class Order {
 
 
   // Dựng lại một đơn từ object đọc ra từ localStorage (JSON không giữ lại getter/phương thức)
+  // JSON không giữ getter / phương thức → tạo object từ Order.prototype rồi chép dữ liệu vào,
+  // để đơn nhận từ server vẫn dùng được items, taxes, nextSteps... (Store gọi hàm này).
   static fromJSON(obj) { return Object.assign(Object.create(Order.prototype), obj); }
   static lineFrom(c) {
     return { name: c.item.name, img: c.item.img, size: c.item.hasSizes ? c.size.label : "", qty: c.qty, unitPrice: c.unitPrice, note: c.note, total: c.total };
@@ -176,6 +199,7 @@ class Order {
 
 
   // Thời điểm cần xong: đơn ASAP tính từ lúc tạo, đơn hẹn giờ tính theo giờ hẹn → dùng để sắp xếp ưu tiên
+  // Thời điểm cần xong: ASAP tính từ lúc tạo, đơn hẹn giờ tính theo giờ hẹn → Staff Dashboard dùng để sắp xếp và đánh dấu đơn gấp.
   get dueAt() { return this.isAsap ? new Date(this.createdAt) : new Date(`${this.date}T${this.time}:00`); }
   get isActive() { return this.status !== "Completed" && this.status !== "Rejected"; }
   get nextSteps() { return (ORDER_FLOW[this.status] || (() => []))(this); }
