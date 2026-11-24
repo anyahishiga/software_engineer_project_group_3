@@ -2,11 +2,10 @@
 
 // 1) Thông tin tài khoản nhận tiền của quán  
 const SHOP_BANK = {
-  // Mã ngân hàng: mã BIN 6 số hoặc tên viết tắt theo NAPAS 
   bankId: "970422",
   bankName: "MB Bank",
   accountNo: "0123456789",
-  accountName: "ALAHU AKBAR", 
+  accountName: "GROUP3", 
   template: "compact2",          // compact2 = QR + thông tin; compact = QR + logo; qr_only = chỉ QR
   prefix: "RP"                   // tiền tố nội dung chuyển khoản → RP1001, RP1002...
 };
