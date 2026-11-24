@@ -9,9 +9,9 @@
 "use strict";
 
 
-// DỮ LIỆU MẪU của thực đơn 
+
 // Lớp cha của mọi hộp thoại: open() dựng khung 1 lần, lớp con chỉ ghi đè title / body / footer / onConfirm.
-// (Dòng chú thích gốc phía trên bị dán nhầm: đây không phải dữ liệu mẫu của thực đơn.)
+
 class Modal {
   constructor(root) { this.root = root; this.el = null; }
   eyebrow() { return ""; } title() { return ""; } subtitle() { return ""; } body() { return ""; }
