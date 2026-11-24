@@ -1,3 +1,11 @@
+// các chức năng chính của Views:
+//
+// khung chung:      View.mount() → render() → bind() → signature() · App.tick() → onTick() → App.refresh()
+// xem thực đơn:     HomeView / OrderView → ItemModal → cart.add() → App.refresh()
+// đặt đơn:          CartView → CheckoutView.submit() → App.placeOrder() → Store.addOrder()
+// xem đơn:          DashboardView ← Store.myOrders() · lookup() → Store.findOrder()
+
+
 "use strict";
 
 
@@ -63,12 +71,14 @@ const bindAll = (root, selector, handler, event = "click") =>
 
 //các class của view
 
+// Lớp cha của mọi màn hình: mount() vẽ HTML rồi bind() gắn sự kiện; chứa các hàm dùng chung (giỏ hàng, tổng tiền, chọn mode).
 class View {
   constructor(app) { this.app = app; this.cart = app.cart; this.schedule = app.schedule; }
   render() { return ""; }
   mount(container) { container.innerHTML = this.render(); this.bind(container); this._sig = this.signature(); }
   // View cần tự cập nhật sẽ ghi đè phương thức này.
   signature() { return ""; }
+  // App gọi mỗi 5 giây: chỉ vẽ lại khi signature() đổi, vì vẽ lại vô điều kiện sẽ xoá ô đang gõ dở.
   onTick() { if (this.signature() !== this._sig) this.app.refresh(); }
   bind() { }
 
@@ -208,6 +218,7 @@ class OrderView extends View {
   }
 
   // Giữ con trỏ ở cuối ô tìm kiếm sau khi cập nhật.
+  // Vẽ lại làm ô tìm kiếm mất focus → focus lại và đặt con trỏ về cuối.
   onSearch(input) {
     this.query = input.value;
     this.app.refresh();
@@ -336,6 +347,8 @@ class CheckoutView extends View {
   }
 
   // Cập nhật lựa chọn và vẽ lại hộp thanh toán.
+  // Đổi phương thức chỉ vẽ lại hộp #payBox (không vẽ lại cả form nên không mất dữ liệu khách đã gõ),
+  // nên phải gắn sự kiện lại cho các nút mới.
   bindPayment(root) {
     bindAll(root, "[data-pay]", el => {
       this.payment = el.dataset.pay;
@@ -345,6 +358,7 @@ class CheckoutView extends View {
   }
 
   // Kiểm tra các trường bắt buộc.
+  // Dùng map (không dừng ở lỗi đầu) để tô đỏ tất cả ô lỗi cùng lúc; trả true khi mọi ô hợp lệ.
   validateRequired(fields) {
     return CHECKOUT_REQUIRED.map(name => {
       const value = fields[name].value;
@@ -354,6 +368,7 @@ class CheckoutView extends View {
     }).every(Boolean);
   }
 
+  // Kiểm tra form → giỏ trống → điều khoản; hợp lệ thì ghép địa chỉ và giao cho App.placeOrder (gửi lên server).
   submit(form) {
     const f = form.elements;
     const valid = this.validateRequired(f);
@@ -409,6 +424,7 @@ class DashboardView extends View {
   }
 
   // [API] Tra cứu qua server nên là hàm async.
+  // Cần cả mã đơn và SĐT để người khác không đoán mã mà xem được đơn của mình.
   async lookup(f) {
     let order;
     try { order = await Store.findOrder(f.code.value, f.phone.value); }
@@ -422,4 +438,4 @@ class DashboardView extends View {
 
   // Cập nhật bảng khi trạng thái đơn thay đổi.
   signature() { return Store.ordersSignature(); }
-}
+} 
