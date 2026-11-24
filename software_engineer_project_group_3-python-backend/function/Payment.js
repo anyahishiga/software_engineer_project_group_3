@@ -10,7 +10,7 @@ const SHOP_BANK = {
   prefix: "RP"                   // tiền tố nội dung chuyển khoản → RP1001, RP1002...
 };
 
-// 2) Phương thức thanh toán hiển thị ở Checkout (đúng thứ tự khai báo; mục ĐẦU TIÊN là mặc định)
+// 2) Phương thức thanh toán hiển thị ở Checkout 
 //    - label / hint : chữ hiện cho khách (hint là hàm nhận "delivery" | "pickup")
 //    - short / status : dùng cho cột Payment ở Customer Dashboard
 const PAYMENT_METHODS = [
